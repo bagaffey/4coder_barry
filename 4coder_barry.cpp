@@ -77,3 +77,146 @@ IsWhitespace(char C)
                  IsEndOfLine(C));
   return(Result);
 }
+
+inline bool
+IsAlpha(char C)
+{
+    bool Result = (((C >= 'a') && (C <= 'z')) ||
+                   ((C >= 'A') && (C <= 'Z')));
+    return(Result);
+}
+
+inline bool
+IsNumeric(char C)
+{
+    bool Result = ((C >= '0') && (C <= '9'));
+    return(Result);
+}
+
+static void
+EatAllWhitespace(tokenizer *Tokenizer)
+{
+    for(;;)
+    {
+        if(IsWhitespace(Tokenizer->At[0]))
+        {
+            ++Tokenizer->At;
+        }
+        else if((Tokenizer->At[0] == '/') &&
+                (Tokenizer->At[1] == '/'))
+        {
+            Tokenizer->At += 2;
+            while(Tokenizer->At[0] && !IsEndOfLine(Tokenizer->At[0]))
+            {
+                ++Tokenizer->At;
+            }
+        }
+        else if((Tokenizer->At[0] == '/') &&
+                (Tokenizer->At[1] == '*'))
+        {
+            Tokenizer->At += 2;
+            while(Tokenizer->At[0] &&
+                  !((Tokenizer->At[0] == '*') &&
+                    (Tokenizer->At[1] == '/')))
+            {
+                ++Tokenizer->At;
+            }
+            
+            if(Tokenizer->At[0] == '*')
+            {
+                Tokenizer->At += 2;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+}
+
+static token
+GetToken(tokenizer *Tokenizer)
+{
+    EatAllWhitespace(Tokenizer);
+    
+    token Token = {};
+    Token.TextLength = 1;
+    Token.Text = Tokenizer->At;
+    char C = Tokenizer->At[0];
+    ++Tokenizer->At;
+    switch(C)
+    {
+        case 0: {--Tokenizer->At; Token.Type = Token_EndOfStream;} break;
+        
+        case '(': {Token.Type = Token_OpenParen;} break;
+        case ')': {Token.Type = Token_CloseParen;} break;
+        case '*': {Token.Type = Token_Asterisk;} break;
+        case '-': {Token.Type = Token_Minus;} break;
+        case '+': {Token.Type = Token_Plus;} break;
+        case '/': {Token.Type = Token_ForwardSlash;} break;
+        case '%': {Token.Type = Token_Percent;} break;
+        case ':': {Token.Type = Token_Colon;} break;
+        case ',': {Token.Type = Token_Comma;} break;
+        
+        default:
+        {
+            if(IsNumeric(C))
+            {
+                Token.Type = Token_Number;
+                while(IsNumeric(Tokenizer->At[0]) ||
+                      (Tokenizer->At[0] == '.') ||
+                      (Tokenizer->At[0] == 'f'))
+                {
+                    ++Tokenizer->At;
+                    Token.TextLength = Tokenizer->At - Token.Text;
+                }
+            }
+            else
+            {
+                Token.Type = Token_Unknown;
+            }
+        } break;
+    }
+    
+    return(Token);
+}
+
+static token
+PeekToken(tokenizer *Tokenizer)
+{
+    tokenizer Tokenizer2 = *Tokenizer;
+    token Result = GetToken(&Tokenizer2);
+    return(Result);
+}
+
+inline bool
+IsH(String extension)
+{
+    bool Result = (match(extension, make_lit_string("h")) ||
+                   match(extension, make_lit_string("hpp")) ||
+                   match(extension, make_lit_string("hin")));
+    return(Result);
+}
+
+inline bool
+IsCPP(String extension)
+{
+    bool Result = (match(extension, make_lit_string("c")) ||
+                   match(extension, make_lit_string("cpp")) ||
+                   match(extension, make_lit_string("cin")));
+    return(Result);
+}
+
+inline bool
+IsINL(String extension)
+{
+    bool Result = (match(extension, make_lit_string("inl")) != 0);
+    return(Result);
+}
+
+inline bool
+IsCode(String extension)
+{
+    bool Result = (IsH(extension) || IsCPP(extension) || IsINL(extension));
+    return(Result);
+}
