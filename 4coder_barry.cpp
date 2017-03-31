@@ -46,3 +46,34 @@ enum token_type
   Token_Comma,
   Token_EndOfStream,
 };
+
+struct token
+{
+  token_type Type;
+  size_t TextLength;
+  char *Text;
+};
+
+struct tokenizer
+{
+  char *At;
+};
+
+inline bool
+IsEndOfLine(char C)
+{
+  bool Result = ((C == '\n') ||
+                 (C == '\r'));
+  return(Result);
+}
+
+inline bool
+IsWhitespace(char C)
+{
+  bool Result = ((C == ' ') ||
+                 (C == '\t') ||
+                 (C == '\v') ||
+                 (C == '\f') ||
+                 IsEndOfLine(C));
+  return(Result);
+}
