@@ -220,3 +220,214 @@ IsCode(String extension)
     bool Result = (IsH(extension) || IsCPP(extension) || IsINL(extension));
     return(Result);
 }
+
+CUSTOM_COMMAND_SIG(casey_open_in_other)
+{
+    exec_command(app, change_active_panel);
+    exec_command(app, cmdid_interactive_open);
+}
+
+CUSTOM_COMMAND_SIG(casey_clean_and_save)
+{
+    exec_command(app, clean_all_lines);
+    exec_command(app, eol_nixify);
+    exec_command(app, cmdid_save);
+}
+
+CUSTOM_COMMAND_SIG(casey_newline_and_indent)
+{
+    View_Summary view = get_active_view(app, AccessProtected);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessProtected);
+    
+    if (buffer.lock_flags & AccessProtected)
+    {
+        exec_command(app, goto_jump_at_cursor);
+    }
+    else
+    {
+        exec_command(app, write_character);
+        exec_command(app, auto_tab_line_at_cursor);
+    }
+}
+
+CUSTOM_COMMAND_SIG(casey_open_file_other_window)
+{
+    exec_command(app, change_active_panel);
+    exec_command(app, cmdid_interactive_open);
+}
+
+CUSTOM_COMMAND_SIG(casey_switch_buffer_other_window)
+{
+    exec_command(app, change_active_panel);
+    exec_command(app, cmdid_interactive_switch_buffer);
+}
+
+internal void
+DeleteAfterCommand(struct Application_Links *app, unsigned long long CommandID)
+{
+    unsigned int access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    
+    int pos2 = view.cursor.pos;
+    if (CommandID < cmdid_count)
+    {
+        exec_command(app, (Command_ID)CommandID);
+    }
+    else
+    {
+        exec_command(app, (Custom_Command_Function*)CommandID);
+    }
+    refresh_view(app, &view);
+    int pos1 = view.cursor.pos;
+    
+    Range range = make_range(pos1, pos2);
+    
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    buffer_replace_range(app, &buffer, range.min, range.max, 0, 0);
+}
+
+CUSTOM_COMMAND_SIG(casey_delete_token_left)
+{
+    DeleteAfterCommand(app, (unsigned long long)seek_white_or_token_left);
+}
+
+CUSTOM_COMMAND_SIG(casey_delete_token_right)
+{
+    DeleteAfterCommand(app, (unsigned long long)seek_white_or_token_right);
+}
+
+CUSTOM_COMMAND_SIG(casey_kill_to_end_of_line)
+{
+    unsigned int access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    
+    int pos2 = view.cursor.pos;
+    exec_command(app, seek_end_of_line);
+    refresh_view(app, &view);
+    int pos1 = view.cursor.pos;
+    
+    Range range = make_range(pos1, pos2);
+    if (pos1 == pos2)
+    {
+        range.max += 1;
+    }
+    
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    buffer_replace_range(app, &buffer, range.min, range.max, 0, 0);
+    exec_command(app, auto_tab_line_at_cursor);
+}
+
+CUSTOM_COMMAND_SIG(casey_paste_and_tab)
+{
+    exec_command(app, paste);
+    exec_command(app, auto_tab_range);
+}
+
+CUSTOM_COMMAND_SIG(casey_seek_beginning_of_line_and_tab)
+{
+    exec_command(app, seek_beginning_of_line);
+    exec_command(app, auto_tab_line_at_cursor);
+}
+
+CUSTOM_COMMAND_SIG(casey_seek_beginning_of_line)
+{
+    exec_command(app, auto_tab_line_at_cursor);
+    exec_command(app, seek_beginning_of_line);
+}
+
+struct switch_to_result
+{
+    bool Switched;
+    bool Loaded;
+    View_Summary view;
+    Buffer_Summary buffer;
+};
+
+inline void
+SanitizeSlashes(String value)
+{
+    for (int At = 0;
+         At < Value.size;
+         ++At;)
+    {
+        if (Value.str[At] == '\\')
+        {
+            Value.str[At] = '/';
+        }
+    }
+}
+
+inline switch_to_result
+SwitchToOrLoadFile(struct Application_Links *app, String FileName, bool CreateIfNotFound = false)
+{
+    switch_to_result Result = {};
+    
+    SanitizeSlashes(FileName);
+    
+    unsigned int access = AccessAll;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer_by_name(app, FileName.str, FileName.size, access);
+    
+    Result.view = view;
+    Result.buffer = buffer;
+    
+    if (buffer.exists)
+    {
+        view_set_buffer(app, &view, buffer.buffer_id, 0);
+        Result.Switched = true;
+    }
+    else
+    {
+        if (file_exists(app, FileName.str, FileName.size) || CreateIfNotFound)
+        {
+            view_open_file(app, &view, FileName.str, FileName.size, true);
+            
+            Result.buffer = get_buffer_by_name(app, FileName.str, FileName.size, access);
+            Result.Loaded = true;
+            Result.Switched = true;
+        }
+    }
+    return(Result);
+}
+
+CUSTOM_COMMAND_SIG(casey_load_todo)
+{
+    String ToDoFileName = make_lit_string("todo.txt");
+    SwitchToOrLoadFile(app, ToDoFileName, true);
+}
+
+CUSTOM_COMMAND_SIG(casey_build_search)
+{
+    int keep_going = 1;
+    int old_size;
+    
+    String dir = make_string(app->memory, 0, app->memory_size);
+    dir.size = directory_get_hot(app, dir.str, dir.memory_size);
+    
+    while (keep_going)
+    {
+        old_size = dir.size;
+        append(&dir, "build.bat");
+        
+        if (file_exists(app, dir.str, dir.size)
+        {
+            dir.size = old_size;
+            memcpy(BuildDirectory, dir.str, dir.size);
+            BuildDirectory[dir.size] = 0;
+            
+            print_message(app, literal("Building with: "));
+            print_message(app, BuildDirectory, dir.size);
+            print_message(app, literal("build.bat\n"));
+            
+            return;
+        }
+        
+        dir.size = old_size;
+        
+        if (directory_cd(app, dir.str, &dir.size, dir.memory_size, literal("..")) == 0)
+        {
+            keep_going = 0;
+            print_message(app, literal("Did not find build.bat\n"));
+        }
+    }
+}
