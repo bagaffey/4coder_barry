@@ -431,3 +431,119 @@ CUSTOM_COMMAND_SIG(casey_build_search)
         }
     }
 }
+
+CUSTOM_COMMAND_SIG(casey_find_corresponding_file)
+{
+    unsigned int access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    String extension = file_extension(make_string(buffer.file_name, buffer.file_name_len));
+    if (extension.str)
+    {
+        char *HExtensions[] =
+        {
+            "hpp",
+            "hin",
+            "h",
+        };
+        
+        char *CExtensions[] =
+        {
+            "c",
+            "cpp",
+            "cin",
+        };
+        
+        int ExtensionCount = 0;
+        char **Extensions = 0;
+        if(IsH(extension))
+        {
+            ExtensionCount = ArrayCount(CExtensions);
+            Extensions = CExtensions;
+        }
+        else if(IsCPP(extension) || IsINL(extension))
+        {
+            ExtensionCount = ArrayCount(HExtensions);
+            Extensions = HExtensions;
+        }
+        
+        int MaxExtensionLength = 3;
+        int Space = (int)(buffer.file_name_len + MaxExtensionLength);
+        String FileNameStem = make_string(buffer.file_name, (int)(extension.str - buffer.file_name), 0);
+        String TestFileName = make_string(app->memory, 0, Space);
+        for (int ExtensionIndex = 0;
+             ExtensionCount;
+             ++ExtensionIndex)
+        {
+            TestFileName.size = 0;
+            append(&TestFileName, FileNameStem);
+            append(&TestFileName, Extensions[ExtensionIndex]);
+            
+            if (SwitchToOrLoadFile(app, TestFileName, ((ExtensionIndex + 1) == ExtensionCount)).Switched)
+            {
+                break;
+            }
+        }
+    }
+}
+
+CUSTOM_COMMAND_SIG(casey_find_corresponding_file_other_window)
+{
+    unsigned int access = AccessProtected;
+    View_Summary old_view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, old_view.buffer_id, access);
+    
+    exec_command(app, change_active_panel);
+    View_Summary new_view = get_active_view(app, AccessAll);
+    view_set_buffer(app, &new_view, buffer_buffer_id, 0);
+}
+
+CUSTOM_COMMAND_SIG(casey_save_and_make_without_asking)
+{
+    exec_command(app, change_active_panel);
+    
+    Buffer_Summary buffer = {};
+    
+    unsigned int access = AccessAll;
+    for (buffer = get_buffer_first(app, access);
+         buffer.exists;
+         get_buffer_next(app, &buffer, access))
+    {
+        save_buffer(app, &buffer, buffer.file_name, buffer.file_name_len, 0);
+    }
+    
+    int size = app->memory_size / 2;
+    String dir = make_string(app->memory, 0, size);
+    String command = make_string((char*)app->memory + size, 0, size);
+    
+    append(&dir, BuildDirectory);
+    for (int At = 0;
+         At < dir.size;
+         ++At)
+    {
+        if (dir.str[At] == '/')
+        {
+            dir.str[At] = '\\';
+        }
+    }
+    
+    append(&command, dir);
+    
+    if (append(&command, "build.bat"))
+    {
+        unsigned int access = AccessAll;
+        View_Summary view = get_active_view(app, access);
+        char *BufferName = GlobalCompilationBufferName;
+        int BufferNameLength = (int) strlen(GlobalCompilationBufferName);
+        exec_system_command(app, &view,
+                            buffer_identifier(BufferName, BufferNameLength),
+                            dir.str, dir.size,
+                            command.str, command.size
+                            CLI_OverlapWithConflict);
+        lock_jump_buffer(BufferName, BufferNameLength);
+    }
+    
+    exec_command(app, change_active_panel);
+    prev_location = null_location;
+}
