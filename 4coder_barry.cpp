@@ -547,3 +547,218 @@ CUSTOM_COMMAND_SIG(casey_save_and_make_without_asking)
     exec_command(app, change_active_panel);
     prev_location = null_location;
 }
+
+CUSTOM_COMMAND_SIG(casey_goto_previous_error)
+{
+    seek_error(app, &global_part, true, false, -1);
+}
+
+CUSTOM_COMMAND_SIG(casey_goto_next_error)
+{
+    seek_error(app, &global_part, true, false, 1);
+}
+
+CUSTOM_COMMAND_SIG(casey_imenu)
+{
+    // Implement
+}
+
+CUSTOM_COMMAND_SIG(casey_call_keyboard_macro)
+{
+    // Implement
+}
+
+CUSTOM_COMMAND_SIG(casey_begin_keyboard_macro_recording)
+{
+    // Implement
+}
+
+CUSTOM_COMMAND_SIG(casey_end_keyboard_macro_recording)
+{
+    // Implement
+}
+
+CUSTOM_COMMAND_SIG(casey_fill_paragraph)
+{
+    // Implement
+}
+
+enum calc_node_type
+{
+    CalcNode_UnaryMinus,
+    CalcNode_Add,
+    CalcNode_Subtract,
+    CalcNode_Multiply,
+    CalcNode_Divide,
+    CalcNode_Mod,
+    CalcNode_Constant,
+};
+
+struct calc_node
+{
+    calc_node_type Type;
+    double Value;
+    calc_node *Left;
+    calc_node *Right;
+};
+
+internal double
+ExecCalcNode(calc_node *Node)
+{
+    double Result = 0.0f;
+    
+    if (Node)
+    {
+        switch(Node->Type)
+        {
+            case CalcNode_UnaryMinus: { Result = -ExecCalcNode(Node->Left); } break;
+            case CalcNode_Add: { Result = ExecCalcNode(Node->Left) + ExecCalcNode(Node->Right); } break;
+            case CalcNode_Subtract: { Result = ExecCalcNode(Node->Left) - ExecCalcNode(Node->Right); } break;
+            case CalcNode_Multiply: { Result = ExecCalcNode(Node->Left) * ExecCalcNode(Node->Right); } break;
+            case CalcNode_Divide: { /* Needs to guard against 0 */ Result = ExecCalcNode(Node->Left) / ExecCalcNode(Node->Right); } break;
+            case CalcNode_Mod: { /* Needs to guard against 0 */ Result = fmod(ExecCalcNode(Node->Left), ExecCalcNode(Node->Right)); } break;
+            case CalcNode_Constant: { Result = Node->Value; } break;
+            default: { Assert(!"Invalid calc type."); }
+        }
+    }
+    
+    return(Result);
+}
+
+internal void
+FreeCalcNode(calc_node *Node)
+{
+    if (Node)
+    {
+        FreeCalcNode(Node->Left);
+        FreeCalcNode(Node->Right);
+        free(Node);
+    }
+}
+
+internal calc_node *
+AddNode(calc_node_type Type, calc_node *Left = 0, calc_node *Right = 0)
+{
+    calc_node *Node = (calc_node *) malloc(sizeof(calc_node));
+    Node->Type = Type;
+    Node->Value = 0;
+    Node->Left = Left;
+    Node->Right = Right;
+    return(Node);
+}
+
+internal calc_node *
+ParseNumber(tokenizer *Tokenizer)
+{
+    calc_node *Result = AddNode(CalcNode_Constant);
+    
+    token Token = GetToken(Tokenizer);
+    Result->Value = atof(Token.Text);
+    
+    return(Result);
+}
+
+internal calc_node * 
+ParseConstant(tokenizer *Tokenizer)
+{
+    calc_node *Result = 0;
+    
+    token Token = PeekToken(Tokenizer);
+    if (Token.Type == Token_Minus)
+    {
+        Token = GetToken(Tokenizer);
+        Result = AddNode(CalcNode_UnaryMinus);
+        Result->Left = ParseNumber(Tokenizer);
+    } 
+    else
+    {
+        Result = ParseNumber(Tokenizer);
+    }
+    
+    return(Result);
+}
+
+internal calc_node *
+ParseMultiplyExpression(tokenizer *Tokenizer)
+{
+    calc_node *Result = 0;
+    
+    token Token = PeekToken(Tokenizer);
+    if ((Token.Type == Token_Minus) ||
+        (Token.Type == Token_Number))
+    {
+        Result = ParseConstant(Tokenizer);
+        token Token = PeekToken(Tokenizer);
+        if (Token.Type == Token_ForwardSlash)
+        {
+            GetToken(Tokenizer);
+            Result = AddNode(CalcNode_Divide, Result, ParseNumber(Tokenizer));
+        }
+        else if (Token.Type == Token_Asterisk)
+        {
+            GetToken(Tokenizer);
+            Result = AddNode(CalcNode_Multiply, Result, ParseNumber(Tokenizer));
+        }
+    }
+    return(Result);
+}
+
+internal calc_node *
+ParseAddExpression(tokenizer *Tokenizer)
+{
+    calc_node *Result = 0;
+    
+    token Token = PeekToken(Tokenizer);
+    if ((Token.Type == Token_Minus) ||
+        (Token.Type == Token_Number))
+    {
+        Result = ParseMultiplyExpression(Tokenizer);
+        token Token = PeekToken(Tokenizer);
+        if (Token.Type == Token_Plus)
+        {
+            GetToken(Tokenizer);
+            Result = AddNode(CalcNode_Add, Result, ParseMultiplyExpression(Tokenizer));
+        }
+        else if (Token.Type == Token_Minus)
+        {
+            GetToken(Tokenizer);
+            Result = AddNode(CalcNode_Subtract, Result, ParseMultiplyExpression(Tokenizer));
+        }
+    }
+    
+    return(Result);
+}
+
+internal calc_node * 
+ParseCalc(tokenizer *Tokenizer)
+{
+    calc_node *Node = ParseExpression(Tokenizer);
+    return(Node);
+}
+
+CUSTOM_COMMAND_SIG(casey_quick_calc)
+{
+    unsigned int access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    
+    Range range = get_range(&view);
+    
+    size_t Size = range.max - range.min
+    char *Stuff = (char *)malloc(Size + 1);
+    Stuff[Size] = 0;
+    
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    buffer_read_range(app, &buffer, range.min, range.max, Stuff);
+    
+    tokenizer Tokenizer = { Stuff };
+    calc_node *CalcTree = ParseCalc(&Tokenizer);
+    double ComputedValue = ExecCalcNode(CalcTree);
+    FreeCalcNode(CalcTree);
+    
+    char ResultBuffer[256];
+    int ResultSize = sprintf(ResultBuffer, "%f", ComputedValue);
+    
+    buffer_replace_range(app, &buffer, range.min, range.max, ResultBuffer, ResultSize);
+    
+    free(Stuff);
+}
