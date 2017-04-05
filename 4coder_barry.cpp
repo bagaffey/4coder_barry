@@ -762,3 +762,101 @@ CUSTOM_COMMAND_SIG(casey_quick_calc)
     
     free(Stuff);
 }
+
+internal void
+OpenProject(Application_Links *app, char *ProjectFileName)
+{
+    int TotalOpenAttempts = 0;
+    
+    FILE *ProjectFile = fopen(ProjectFileName, "r");
+    if (ProjectFile)
+    {
+        fgets(BuildDirectory, sizeof(BuildDirectory) - 1, ProjectFile);
+        size_t BuildDirSize = strlen(BuildDirectory);
+        if ((BuildDirSize) && (BuildDirectory[BuildDirSize - 1] == '\n'))
+        {
+            --BuildDirSize;
+        }
+        
+        if ((BuildDirSize) && (BuildDirectory[BuildDirSize - 1] != '/'))
+        {
+            BuildDirectory[BuildDirSize++] = '/';
+            BuildDirectory[BuildDirSize] = 0;
+        }
+        
+        char SourceFileDirectoryName[4096];
+        char FileDirectoryName[4096];
+        while (fgets(SourceFileDirectoryName, sizeof(SourceFileDirectoryName) - 1, ProjectFile))
+        {
+            String dir = make_string(FileDirectoryName, 0, sizeof(FileDirectoryName));
+            append(&dir, SourceFileDirectoryName);
+            if (dir.size && dir.str[dir.size - 1] == '\n')
+            {
+                --dir.size;
+            }
+            
+            if (dir.size && dir.str[dir.size - 1] != '/')
+            {
+                dir.str[dir.size++] = '/';
+            }
+            
+            File_List list = get_file_list(app, dir.str, dir.size);
+            int dir_size = dir.size;
+            
+            for (unsigned int i = 0; i < list.count; ++i)
+            {
+                File_Info *info = list.infos + i;
+                if (!info->folder)
+                {
+                    String filename = make_string(info->filename, info->filename_len);
+                    String extension = file_extension(filename);
+                    if (IsCode(extension))
+                    {
+                        // 4coder API cannot use relative paths a.t.m.
+                        // Everything must be full paths.
+                        // Set the dir string size back to what it was originally
+                        // That way, new appends overwrite old ones.
+                        dir.size = dir_size;
+                        append(&dir, info->filename);
+                        
+                        open_file(app, 0, dir.str, dir.size, true, true);
+                        ++TotalOpenAttempts;
+                    }
+                }
+            }
+            
+            free_file_list(app, list);
+        }
+        fclose(ProjectFile);
+    }
+}
+
+CUSTOM_COMMAND_SIG(casey_execute_arbitrary_command)
+{
+    Query_Bar bar;
+    char space[1024], more_space[1024];
+    bar.prompt = make_lit_string("Command: ");
+    bar.string = make_fixed_width_string(space);
+    
+    if (!query_user_string(app, &bar)) return;
+    end_query_bar(app, &bar, 0);
+    
+    if (match(bar.string, make_lit_string("project")))
+    {
+        // exec_command(app, open_all_code);
+    }
+    else if (match(bar.string, make_lit_string("open menu")))
+    {
+        exec_command(app, cmdid_open_menu);
+    }
+    else
+    {
+        bar.prompt = make_fixed_width_string(more_space);
+        append(&bar.prompt, make_lit_string("Unrecognized: "));
+        append(&bar.prompt, bar.string);
+        bar.string.size = 0;
+        
+        start_query_bar(app, &bar, 0);
+        get_user_input(app, EventOnAnyKey | EventOnButton, 0);
+    }
+}
