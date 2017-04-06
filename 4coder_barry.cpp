@@ -860,3 +860,70 @@ CUSTOM_COMMAND_SIG(casey_execute_arbitrary_command)
         get_user_input(app, EventOnAnyKey | EventOnButton, 0);
     }
 }
+
+internal void
+UpdateModalIndicator(Application_Links *app)
+{
+    Theme_Color normal_colors[] = 
+    {
+        {Stag_Cursor, 0x40FF40},
+        {Stag_At_Cursor, 0x161616},
+        {Stag_Mark, 0x808080},
+        {Stag_Margin, 0x262626},
+        {Stag_Margin_Hover, 0x333333},
+        {Stag_Margin_Active, 0x404040},
+        {Stag_Bar, 0xCACACA}
+    };
+    
+    Theme_Color edit_colors[] =
+    {
+        {Stag_Cursor, 0xFF0000},
+        {Stag_At_Cursor, 0x00FFFF},
+        {Stag_Mark, 0xFF6F1A},
+        {Stag_Margin, 0x33170B},
+        {Stag_Margin_Hover, 0x49200F},
+        {Stag_Margin_Active, 0x934420},
+        {Stag_Bar, 0x934420}
+    };
+    
+    if (GlobalEditMode) {
+        set_theme_colors(app, edit_colors, ArrayCount(edit_colors));
+    }
+    else
+    {
+        set_theme_colors(app, normal_colors, ArrayCount(normal_colors));
+    }
+}
+
+CUSTOM_COMMAND_SIG(begin_free_typing)
+{
+    GlobalEditMode = false;
+    UpdateModalIndicator(app);
+}
+
+CUSTOM_COMMAND_SIG(end_free_typing)
+{
+    GlobalEditMode = true;
+    UpdateModalIndicator(app);
+}
+
+#define DEFINE_FULL_BIMODAL_KEY(binding_name, edit_code, normal_code) \
+CUSTOM_COMMAND_SIG(binding_name) \
+{ \
+    if (GlobalEditMode) \
+    { \
+        edit_code; \
+    } \
+    else \
+    { \
+        normal_code; \
+    } \
+}
+
+#define DEFINE_BIMODAL_KEY(binding_name, edit_code, normal_code) DEFINE_FULL_BIMODAL_KEY(binding_name, exec_command(app, edit_code), exec_command(app, normal_code))
+#define DEFINE_MODAL_KEY(binding_name, edit_code) DEFINE_BIMODAL_KEY(binding_name, edit_code, write_character)
+
+// paste_next
+// cmdid_history_backward
+// cmdid_history_forward
+// toggle_line_wrap
