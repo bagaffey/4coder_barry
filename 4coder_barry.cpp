@@ -1,4 +1,3 @@
-// timestamp 4/7/2017 5:01 PM.
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
