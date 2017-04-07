@@ -927,3 +927,91 @@ CUSTOM_COMMAND_SIG(binding_name) \
 // cmdid_history_backward
 // cmdid_history_forward
 // toggle_line_wrap
+
+DEFINE_MODAL_KEY(modal_space, set_mark);
+DEFINE_MODAL_KEY(modal_back_slash, casey_clean_and_save);
+DEFINE_MODAL_KEY(modal_single_quote, casey_call_keyboard_macro);
+DEFINE_MODAL_KEY(modal_comma, casey_goto_previous_error);
+DEFINE_MODAL_KEY(modal_period, casey_fill_paragraph);
+DEFINE_MODAL_KEY(modal_forward_slash, change_active_panel);
+DEFINE_MODAL_KEY(modal_semicolon, cursor_mark_swap); // cmdid_history_backward?
+DEFINE_BIMODAL_KEY(modal_open_bracket, casey_begin_keyboard_macro_recording, write_and_auto_tab);
+DEFINE_BIMODAL_KEY(modal_close_bracket, casey_end_keyboard_macro_recording, write_and_auto_tab);
+DEFINE_MODAL_KEY(modal_a, write_character); // Arbitrary command + casey_quick_calc
+DEFINE_MODAL_KEY(modal_b, cmdid_interactive_switch_buffer);
+DEFINE_MODAL_KEY(modal_c, casey_find_corresponding_file);
+DEFINE_MODAL_KEY(modal_d, casey_kill_to_end_of_file);
+DEFINE_MODAL_KEY(modal_e, list_all_locations);
+DEFINE_MODAL_KEY(modal_f, casey_paste_and_tab);
+DEFINE_MODAL_KEY(modal_g, goto_line);
+DEFINE_MODAL_KEY(modal_h, auto_tab_range);
+DEFINE_MODAL_KEY(modal_i, move_up);
+DEFINE_MODAL_KEY(modal_j, seek_white_or_token_left);
+DEFINE_MODAL_KEY(modal_k, move_down);
+DEFINE_MODAL_KEY(modal_l, seek_white_or_token_right);
+DEFINE_MODAL_KEY(modal_m, casey_save_and_make_without_asking);
+DEFINE_MODAL_KEY(modal_n, casey_goto_next_error);
+DEFINE_MODAL_KEY(modal_o, query_replace);
+DEFINE_MODAL_KEY(modal_p, replace_in_range);
+DEFINE_MODAL_KEY(modal_q, copy);
+DEFINE_MODAL_KEY(modal_r, reverse_search);
+DEFINE_MODAL_KEY(modal_s, search);
+DEFINE_MODAL_KEY(modal_t, casey_load_todo);
+DEFINE_MODAL_KEY(modal_u, cmdid_undo);
+DEFINE_MODAL_KEY(modal_v, casey_switch_buffer_other_window);
+DEFINE_MODAL_KEY(modal_w, cut);
+DEFINE_MODAL_KEY(modal_x, casey_find_corresponding_file_other_window);
+DEFINE_MODAL_KEY(modal_y, cmdid_redo);
+DEFINE_MODAL_KEY(modal_z, cmdid_interactive_open);
+
+// All write_character's are available for being assigned a command.
+DEFINE_MODAL_KEY(modal_1, casey_build_search);
+DEFINE_MODAL_KEY(modal_2, write_character);
+DEFINE_MODAL_KEY(modal_3, write_character);
+DEFINE_MODAL_KEY(modal_4, write_character);
+DEFINE_MODAL_KEY(modal_5, write_character);
+DEFINE_MODAL_KEY(modal_6, write_character);
+DEFINE_MODAL_KEY(modal_7, write_character);
+DEFINE_MODAL_KEY(modal_8, write_character);
+DEFINE_MODAL_KEY(modal_9, write_character);
+DEFINE_MODAL_KEY(modal_0, cmdid_kill_buffer);
+DEFINE_MODAL_KEY(modal_minus, write_character);
+DEFINE_MODAL_KEY(modal_equals, casey_execute_arbitrary_command);
+
+DEFINE_BIMODAL_KEY(modal_backspace, casey_delete_token_left, backspace_char);
+DEFINE_BIMODAL_KEY(modal_up, move_up, move_up);
+DEFINE_BIMODAL_KEY(modal_down, move_down, move_down);
+DEFINE_BIMODAL_KEY(modal_left, seek_white_or_token_left, move_left);
+DEFINE_BIMODAL_KEY(modal_right, seek_white_or_token_right, move_right);
+DEFINE_BIMODAL_KEY(modal_delete, casey_delete_token_right, delete_char);
+DEFINE_BIMODAL_KEY(modal_home, casey_seek_beginning_of_line, casey_seek_beginning_of_line_and_tab);
+DEFINE_BIMODAL_KEY(modal_end, seek_end_of_line, seek_end_of_line);
+DEFINE_BIMODAL_KEY(modal_page_up, page_up, seek_whitespace_up);
+DEFINE_BIMODAL_KEY(modal_page_down, page_down, seek_whitespace_down);
+DEFINE_BIMODAL_KEY(modal_tab, word_complete, word_complete);
+
+OPEN_FILE_HOOK_SIG(casey_file_settings)
+{
+    unsigned int access = AccessAll;
+    Buffer_Summary buffer = get_buffer(app, buffer_id, access);
+    
+    int treat_as_code = 0;
+    int treat_as_project = 0;
+    
+    if (buffer.file_name && buffer.size < (16 << 20))
+    {
+        String ext = file_extension(make_string(buffer.file_name, buffer.file_name_len));
+        treat_as_code = IsCode(ext);
+        treat_as_project = match(ext, make_lit_string("prj"));
+    }
+    
+    buffer_set_setting(app, &buffer, BufferSetting_Lex, treat_as_code);
+    buffer_set_setting(app, &buffer, BufferSetting_WrapLine, !treat_as_code);
+    buffer_set_setting(app, &buffer, BufferSetting_MapID, mapid_file);
+    
+    if (treat_as_project)
+    {
+        OpenProject(app, buffer.file_name);
+    }
+    return (0);
+}
