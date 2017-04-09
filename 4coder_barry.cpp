@@ -1015,3 +1015,99 @@ OPEN_FILE_HOOK_SIG(casey_file_settings)
     }
     return (0);
 }
+
+bool
+CubicUpdateFixedDuration1(float *P0, float *V0, float P1, float V1, float Duration, float dt)
+{
+    bool Result = false;
+    
+    if (dt > 0)
+    {
+        if (Duration < dt)
+        {
+            *P0 = P1 + (dt - Duration)*V1;
+            *V0 = V1;
+            Result = true;
+        }
+        else
+        {
+            float t = (dt / Duration);
+            float u = (1.0f - t);
+            
+            float C0 = 1*u*u*u;
+            float C1 = 3*u*u*t;
+            float C2 = 3*u*t*t;
+            float C3 = 1*t*t*t;
+            
+            float dC0 = -3*u*u;
+            float dC1 = -6*u*t + 3*u*u;
+            float dC2 = 6*u*t - 3*t*t;
+            float dC3 = 3*t*t;
+            
+            float B0 = *P0;
+            float B1 = *P0 + (Duration / 3.0f) * *V0;
+            float B2 = P1 - (Duration / 3.0f) * V1;
+            float B3 = P1;
+            
+            *P0 = C0*B0 + C1*B1 + C2*B2 + C3*B3;
+            *V0 = (dC0*B0 + dC1*B1 + dC2*B2 + dC3*B3) * (1.0f / Duration);
+        }
+    }
+    return (Result);
+}
+
+struct Casey_Scroll_Velocity
+{
+    float x, y, t;
+};
+
+Casey_Scroll_Velocity casey_scroll_velocity_[16] = {0};
+Casey_Scroll_Velocity *casey_scroll_velocity = casey_scroll_velocity_ - 1;
+
+SCROLL_RULE_SIG(casey_smooth_scroll_rule) {
+    Casey_Scroll_Velocity *velocity = casey_scroll_velocity + view_id;
+    int result = 0;
+    if (is_new_target)
+    {
+        if ((*scroll_x != target_x) ||
+            (*scroll_y != target_y))
+        {
+            velocity->t = 0.1f;
+        }
+    }
+    
+    if (velocity->t > 0)
+    {
+        result = !(CubicUpdateFixedDuration1(scroll_x, &velocity->x, target_x, 0.0f, velocity->t, dt) ||
+                   CubicUpdateFixedDuration1(scroll_y, &velocity->y, target_y, 0.0f, velocity->t, dt));
+    }
+    
+    velocity->t -= dt;
+    if (velocity->t < 0)
+    {
+        velocity->t = 0;
+        *scroll_x = target_x;
+        *scroll_y = target_y;
+    }
+    
+    return (result);
+}
+
+#include <windows.h>
+#pragma comment(lib, "user32.lib")
+static HWND GlobalWindowHandle;
+static WINDOWPLACEMENT GlobalWindowPosition = { sizeof(GlobalWindowPosition) };
+internal BOOL CALLBACK win32_find_4coder_window(HWND Window, LPARAM LParam)
+{
+    BOOL Result = TRUE;
+    
+    char TestClassName[256];
+    GetClassName(Window, TestClassName, sizeof(TestClassName));
+    if ((strcmp("4coder-win32-wndclass", TestClassName) == 0) &&
+        ((HINSTANCE)GetWindowLongPtr(Window, GWLP_HINSTANCE) == GetModuleHandle(0)))
+    {
+        GlobalWindowHandle = Window;
+        Result = FALSE;
+    }
+    return(Result);
+}
