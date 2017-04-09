@@ -1111,3 +1111,39 @@ internal BOOL CALLBACK win32_find_4coder_window(HWND Window, LPARAM LParam)
     }
     return(Result);
 }
+
+internal void
+win32_toggle_fullscreen(void)
+{
+    #if 0
+    // Raymond Chen's prescription for fullscreen toggling
+    // http://blog.msdn.com/b/oldnewthing/archive/2010/04/12/9994016.aspx
+    
+    HWND Window = GlobalWindowHandle;
+    DWORD Style = GetWindowLong(Window, GWL_STYLE);
+    if (Style & WS_OVERLAPPEDWINDOW)
+    {
+        MONITORINFO MonitorInfo = { sizeof(MonitorInfo) };
+        if (GetWindowPlacement(Window, &GlobalWindowPostion) &&
+            GetMonitorInfo(MonitorFromWindow(Window, MONITOR_DEFAULTTOPRIMARY), &MonitorInfo))
+        {
+            SetWindowLong(Window, GWL_STYLE, Style & ~WS_OVERLAPPEDWINDOW);
+            SetWindowPos(Window, HWND_TOP,
+                         MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
+                         MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left,
+                         MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top,
+                         SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+        }
+    }
+    else
+    {
+        SetWindowLong(Window, GWL_STYLE, Style | WS_OVERLAPPEDWINDOW);
+        SetWindowPlacement(Window, &GlobalWindowPosition);
+        SetWindowPos(Window, 0, 0, 0, 0, 0,
+                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+                     SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    }
+    #else
+    ShowWindow(GlobalWindowHandle, SW_MAXIMIZE);
+    #endif
+}
