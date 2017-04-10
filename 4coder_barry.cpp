@@ -1147,3 +1147,60 @@ win32_toggle_fullscreen(void)
     ShowWindow(GlobalWindowHandle, SW_MAXIMIZE);
     #endif
 }
+
+HOOK_SIG(casey_start)
+{
+    // Note(Allen): This initializes a couple of global memory
+    // management structs on the custom side that are used in
+    // some of the new 4coder features including building and
+    // custom-side word complete.
+    init_memory(app);
+    
+    exec_command(app, hide_scrollbar);
+    exec_command(app, open_panel_vsplit);
+    exec_command(app, hide_scrollbar);
+    exec_command(app, change_active_panel);
+    
+    change_theme(app, literal("Handmade Hero"));
+    change_font(app, literal("Liberation Mono"), true);
+    
+    Theme_Color colors[] =
+    {
+        { Stag_Default, 0x00e676 },
+        // { Stag_Bar, },
+        // { Stag_Bar_Active, },
+        // { Stag_Base, },
+        // { Stag_Pop1, },
+        // { Stag_Pop2, },
+        // { Stag_Back, },
+        // { Stag_Margin, },
+        // { Stag_Margin_Hover, },
+        // { Stag_Margin_Active, },
+        // { Stag_Cursor, },
+        // { Stag_At_Cursor, },
+        // { Stag_Cursor, },
+        // { Stag_At_Cursor, },
+        // { Stag_Highlight, },
+        // { Stag_At_Highlight, },
+        { Stag_Comment, 0xff9800 },
+        { Stag_Keyword, 0x5e98ba },
+        // { Stag_Str_Constant, },
+        // { Stag_Char_Constant, },
+        // { Stag_Int_Constant, },
+        // { Stag_Float_Constant, },
+        // { Stag_Bool_Constant, },
+        { Stag_Preproc, 0x3f51b5 },
+        { Stag_Include, 0xc0c1c2 },
+        // { Stag_Special_Character, },
+        // { Stag_Highlight_Junk, },
+        // { Stag_Highlight_Write, },
+        // { Stag_Paste, },
+        // { Stag_Undo, },
+        // { Stag_Next_Undo, },
+    };
+    set_theme_colors(app, colors, ArrayCount(colors));
+    
+    win32_toggle_fullscreen();
+    
+    return(0);
+}
