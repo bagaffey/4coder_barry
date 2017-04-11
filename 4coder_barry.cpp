@@ -1204,3 +1204,131 @@ HOOK_SIG(casey_start)
     
     return(0);
 }
+
+extern "C" GET_BINDING_DATA(get_bindings)
+{
+    Bind_Helper context_actual = begin_bind_helper(data, size);
+    Bind_Helper *context = &context_actual;
+    
+    set_hook(context, hook_start, casey_start);
+    set_command_caller(context, default_command_caller);
+    set_open_file_hook(context, casey_file_settings);
+    set_scroll_rule(context, casey_smooth_scroll_rule);
+    
+    EnumWindows(win32_find_4coder_window, 0);
+    
+    begin_map(context, mapid_global);
+    {
+        bind(context, 'z', MDFR_NONE, cmdid_interactive_open);
+        bind(context, 'x', MDFR_NONE, casey_open_in_other);
+        bind(context, 't', MDFR_NONE, casey_load_todo);
+        bind(context, '/', MDFR_NONE, change_active_panel);
+        bind(context, 'b', MDFR_NONE, cmdid_interactive_switch_buffer);
+        bind(context, key_page_up, MDFR_NONE, search);
+        bind(context, key_page_down, MDFR_NONE, reverse_search);
+        bind(context, 'm', MDFR_NONE, casey_save_and_make_without_asking);
+        bind(context, key_mouse_left, MDFR_NONE, click_set_cursor);
+    }
+    end_map(context);
+    
+    begin_map(context, mapid_file);
+    
+    bind_vanilla_keys(context, write_character);
+    
+    bind(context, key_insert, MDFR_NONE, begin_free_typing);
+    bind(context, '`', MDFR_NONE, begin_free_typing);
+    bind(context, key_esc, MDFR_NONE, end_free_typing);
+    bind(context, '\n', MDFR_NONE, casey_newline_and_indent);
+    bind(context, '\n', MDFR_SHIFT, casey_newline_and_indent);
+    
+    // MODAL KEYS
+    bind(context, ' ', MDFR_NONE, modal_space);
+    bind(context, ' ', MDFR_SHIFT, modal_space);
+    
+    bind(context, '\\', MDFR_NONE, modal_back_slash);
+    bind(context, '\'', MDFR_NONE, modal_single_quote);
+    bind(context, ',', MDFR_NONE, modal_comma);
+    bind(context, '.', MDFR_NONE, modal_period);
+    bind(context, '/', MDFR_NONE, modal_forward_slash);
+    bind(context, ';', MDFR_NONE, modal_semicolon);
+    bind(context, '[', MDFR_NONE, modal_open_bracket);
+    bind(context, ']', MDFR_NONE, modal_close_bracket);
+    bind(context, '{', MDFR_NONE, write_and_auto_tab);
+    bind(context, '}', MDFR_NONE, write_and_auto_tab);
+    bind(context, 'a', MDFR_NONE, modal_a);
+    bind(context, 'b', MDFR_NONE, modal_b);
+    bind(context, 'c', MDFR_NONE, modal_c);
+    bind(context, 'd', MDFR_NONE, modal_d);
+    bind(context, 'e', MDFR_NONE, modal_e);
+    bind(context, 'f', MDFR_NONE, modal_f);
+    bind(context, 'g', MDFR_NONE, modal_g);
+    bind(context, 'h', MDFR_NONE, modal_h);
+    bind(context, 'i', MDFR_NONE, modal_i);
+    bind(context, 'j', MDFR_NONE, modal_j);
+    bind(context, 'k', MDFR_NONE, modal_k);
+    bind(context, 'l', MDFR_NONE, modal_l);
+    bind(context, 'm', MDFR_NONE, modal_m);
+    bind(context, 'n', MDFR_NONE, modal_n);
+    bind(context, 'o', MDFR_NONE, modal_o);
+    bind(context, 'q', MDFR_NONE, modal_q);
+    bind(context, 'r', MDFR_NONE, modal_r);
+    bind(context, 's', MDFR_NONE, modal_s);
+    bind(context, 't', MDFR_NONE, modal_t);
+    bind(context, 'u', MDFR_NONE, modal_u);
+    bind(context, 'v', MDFR_NONE, modal_v);
+    bind(context, 'w', MDFR_NONE, modal_w);
+    bind(context, 'x', MDFR_NONE, modal_x);
+    bind(context, 'y', MDFR_NONE, modal_y);
+    bind(context, 'z', MDFR_NONE, modal_z);
+    
+    bind(context, '1', MDFR_NONE, modal_1);
+    bind(context, '2', MDFR_NONE, modal_2);
+    bind(context, '3', MDFR_NONE, modal_3);
+    bind(context, '4', MDFR_NONE, modal_4);
+    bind(context, '5', MDFR_NONE, modal_5);
+    bind(context, '6', MDFR_NONE, modal_6);
+    bind(context, '7', MDFR_NONE, modal_7);
+    bind(context, '8', MDFR_NONE, modal_8);
+    bind(context, '9', MDFR_NONE, modal_9);
+    bind(context, '0', MDFR_NONE, modal_0);
+    bind(context, '-', MDFR_NONE, modal_minus);
+    bind(context, '=', MDFR_NONE, modal_equals);
+    
+    bind(context, key_back, MDFR_NONE, modal_backspace);
+    bind(context, key_back, MDFR_SHIFT, modal_backspace);
+    
+    bind(context, key_up, MDFR_NONE, modal_up);
+    bind(context, key_up, MDFR_SHIFT, modal_up);
+    
+    bind(context, key_down, MDFR_NONE, modal_down);
+    bind(context, key_down, MDFR_SHIFT, modal_down);
+    
+    bind(context, key_left, MDFR_NONE, modal_left);
+    bind(context, key_left, MDFR_SHIFT, modal_left);
+    
+    bind(context, key_right, MDFR_NONE, modal_right);
+    bind(context, key_right, MDFR_SHIFT, modal_right);
+    
+    bind(context, key_del, MDFR_NONE, modal_delete);
+    bind(context, key_del, MDFR_SHIFT, modal_delete);
+    
+    bind(context, key_home, MDFR_NONE, modal_home);
+    bind(context, key_home, MDFR_SHIFT, modal_home);
+    
+    bind(context, key_end, MDFR_NONE, modal_end);
+    bind(context, key_end, MDFR_SHIFT, modal_end);
+    
+    bind(context, key_page_up, MDFR_NONE, modal_page_up);
+    bind(context, key_page_up, MDFR_SHIFT, modal_page_up);
+    
+    bind(context, key_page_down, MDFR_NONE, modal_page_down);
+    bind(context, key_page_down, MDFR_SHIFT, modal_page_down);
+    
+    bind(context, '\t', MDFR_NONE, modal_tab);
+    bind(context, '\t', MDFR_SHIFT, modal_tab);
+    
+    end_map(context);
+    
+    end_bind_helper(context);
+    return context->write_total;
+}
