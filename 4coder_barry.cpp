@@ -344,11 +344,11 @@ struct switch_to_result
 };
 
 inline void
-SanitizeSlashes(String value)
+SanitizeSlashes(String Value)
 {
     for (int At = 0;
          At < Value.size;
-         ++At;)
+         ++At)
     {
         if (Value.str[At] == '\\')
         {
@@ -409,7 +409,7 @@ CUSTOM_COMMAND_SIG(casey_build_search)
         old_size = dir.size;
         append(&dir, "build.bat");
         
-        if (file_exists(app, dir.str, dir.size)
+        if (file_exists(app, dir.str, dir.size))
         {
             dir.size = old_size;
             memcpy(BuildDirectory, dir.str, dir.size);
@@ -496,7 +496,7 @@ CUSTOM_COMMAND_SIG(casey_find_corresponding_file_other_window)
     
     exec_command(app, change_active_panel);
     View_Summary new_view = get_active_view(app, AccessAll);
-    view_set_buffer(app, &new_view, buffer_buffer_id, 0);
+    view_set_buffer(app, &new_view, buffer.buffer_id, 0);
 }
 
 CUSTOM_COMMAND_SIG(casey_save_and_make_without_asking)
@@ -539,7 +539,7 @@ CUSTOM_COMMAND_SIG(casey_save_and_make_without_asking)
         exec_system_command(app, &view,
                             buffer_identifier(BufferName, BufferNameLength),
                             dir.str, dir.size,
-                            command.str, command.size
+                            command.str, command.size,
                             CLI_OverlapWithConflict);
         lock_jump_buffer(BufferName, BufferNameLength);
     }
@@ -732,7 +732,7 @@ ParseAddExpression(tokenizer *Tokenizer)
 internal calc_node * 
 ParseCalc(tokenizer *Tokenizer)
 {
-    calc_node *Node = ParseExpression(Tokenizer);
+    calc_node *Node = ParseAddExpression(Tokenizer);
     return(Node);
 }
 
@@ -743,7 +743,7 @@ CUSTOM_COMMAND_SIG(casey_quick_calc)
     
     Range range = get_range(&view);
     
-    size_t Size = range.max - range.min
+    size_t Size = range.max - range.min;
     char *Stuff = (char *)malloc(Size + 1);
     Stuff[Size] = 0;
     
@@ -940,7 +940,7 @@ DEFINE_BIMODAL_KEY(modal_close_bracket, casey_end_keyboard_macro_recording, writ
 DEFINE_MODAL_KEY(modal_a, write_character); // Arbitrary command + casey_quick_calc
 DEFINE_MODAL_KEY(modal_b, cmdid_interactive_switch_buffer);
 DEFINE_MODAL_KEY(modal_c, casey_find_corresponding_file);
-DEFINE_MODAL_KEY(modal_d, casey_kill_to_end_of_file);
+DEFINE_MODAL_KEY(modal_d, casey_kill_to_end_of_line);
 DEFINE_MODAL_KEY(modal_e, list_all_locations);
 DEFINE_MODAL_KEY(modal_f, casey_paste_and_tab);
 DEFINE_MODAL_KEY(modal_g, goto_line);
