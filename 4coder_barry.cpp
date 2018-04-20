@@ -30,6 +30,7 @@ static bool GlobalEditMode;
 static char *GlobalCompilationBufferName = "*compilation*";
 
 static char BuildDirectory[4096] = "./";
+static char TempDirectory[4096] = " ";
 
 enum token_type
 {
