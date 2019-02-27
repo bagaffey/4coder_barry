@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "4coder_default_include.cpp"
-#include "4coder_jump_parsing.cpp"
+//#include "4coder_jump_parsing.cpp"
 
 #if !defined(Assert)
 #define Assert assert
@@ -13,6 +13,8 @@
 #if !defined(internal)
 #define internal static
 #endif
+
+#define ZeroStruct(a) memset(&(a), 0, sizeof(a))
 
 struct Parsed_Error
 {
@@ -224,15 +226,15 @@ IsCode(String extension)
 
 CUSTOM_COMMAND_SIG(casey_open_in_other)
 {
-    exec_command(app, change_active_panel);
-    exec_command(app, cmdid_interactive_open);
+	exec_command(app, change_active_panel);
+	exec_command(app, interactive_open_or_new);
 }
 
 CUSTOM_COMMAND_SIG(casey_clean_and_save)
 {
     exec_command(app, clean_all_lines);
     exec_command(app, eol_nixify);
-    exec_command(app, cmdid_save);
+    exec_command(app, save);
 }
 
 CUSTOM_COMMAND_SIG(casey_newline_and_indent)
@@ -254,13 +256,13 @@ CUSTOM_COMMAND_SIG(casey_newline_and_indent)
 CUSTOM_COMMAND_SIG(casey_open_file_other_window)
 {
     exec_command(app, change_active_panel);
-    exec_command(app, cmdid_interactive_open);
+	exec_command(app, interactive_open_or_new);
 }
 
 CUSTOM_COMMAND_SIG(casey_switch_buffer_other_window)
 {
     exec_command(app, change_active_panel);
-    exec_command(app, cmdid_interactive_switch_buffer);
+    exec_command(app, interactive_switch_buffer);
 }
 
 internal void
@@ -546,7 +548,7 @@ CUSTOM_COMMAND_SIG(casey_save_and_make_without_asking)
     }
     
     exec_command(app, change_active_panel);
-    prev_location = null_location;
+	ZeroStruct(prev_location);
 }
 
 CUSTOM_COMMAND_SIG(casey_goto_previous_error)
@@ -742,7 +744,7 @@ CUSTOM_COMMAND_SIG(casey_quick_calc)
     unsigned int access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     
-    Range range = get_range(&view);
+	Range range = get_view_range(&view);
     
     size_t Size = range.max - range.min;
     char *Stuff = (char *)malloc(Size + 1);
@@ -859,7 +861,7 @@ CUSTOM_COMMAND_SIG(casey_execute_arbitrary_command)
         bar.string.size = 0;
         
         start_query_bar(app, &bar, 0);
-        get_user_input(app, EventOnAnyKey | EventOnButton, 0);
+        get_user_input(app, EventOnAnyKey, 0);
     }
 }
 
@@ -940,7 +942,7 @@ DEFINE_MODAL_KEY(modal_semicolon, cursor_mark_swap); // cmdid_history_backward?
 DEFINE_BIMODAL_KEY(modal_open_bracket, casey_begin_keyboard_macro_recording, write_and_auto_tab);
 DEFINE_BIMODAL_KEY(modal_close_bracket, casey_end_keyboard_macro_recording, write_and_auto_tab);
 DEFINE_MODAL_KEY(modal_a, write_character); // Arbitrary command + casey_quick_calc
-DEFINE_MODAL_KEY(modal_b, cmdid_interactive_switch_buffer);
+DEFINE_MODAL_KEY(modal_b, interactive_switch_buffer);
 DEFINE_MODAL_KEY(modal_c, casey_find_corresponding_file);
 DEFINE_MODAL_KEY(modal_d, casey_kill_to_end_of_line);
 DEFINE_MODAL_KEY(modal_e, list_all_locations);
@@ -964,7 +966,7 @@ DEFINE_MODAL_KEY(modal_v, casey_switch_buffer_other_window);
 DEFINE_MODAL_KEY(modal_w, cut);
 DEFINE_MODAL_KEY(modal_x, casey_find_corresponding_file_other_window);
 DEFINE_MODAL_KEY(modal_y, cmdid_redo);
-DEFINE_MODAL_KEY(modal_z, cmdid_interactive_open);
+DEFINE_MODAL_KEY(modal_z, interactive_open_or_new);
 
 // All write_character's are available for being assigned a command.
 DEFINE_MODAL_KEY(modal_1, casey_build_search);
@@ -976,7 +978,7 @@ DEFINE_MODAL_KEY(modal_6, write_character);
 DEFINE_MODAL_KEY(modal_7, write_character);
 DEFINE_MODAL_KEY(modal_8, write_character);
 DEFINE_MODAL_KEY(modal_9, write_character);
-DEFINE_MODAL_KEY(modal_0, cmdid_kill_buffer);
+DEFINE_MODAL_KEY(modal_0, kill_buffer);
 DEFINE_MODAL_KEY(modal_minus, write_character);
 DEFINE_MODAL_KEY(modal_equals, casey_execute_arbitrary_command);
 
@@ -1150,13 +1152,11 @@ win32_toggle_fullscreen(void)
     #endif
 }
 
+
+
+#if 0
 HOOK_SIG(casey_start)
 {
-    // Note(Allen): This initializes a couple of global memory
-    // management structs on the custom side that are used in
-    // some of the new 4coder features including building and
-    // custom-side word complete.
-    init_memory(app);
     
     exec_command(app, hide_scrollbar);
     exec_command(app, open_panel_vsplit);
@@ -1206,131 +1206,179 @@ HOOK_SIG(casey_start)
     
     return(0);
 }
+#endif
+
+START_HOOK_SIG(casey_start)
+{
+	bool HandmadeHeroMachine = 1 == 1;
+
+	default_4coder_initialize(app);
+
+	exec_command(app, hide_scrollbar);
+	if (!HandmadeHeroMachine) { exec_command(app, hide_filebar); }
+	exec_command(app, open_panel_vsplit);
+	exec_command(app, hide_scrollbar);
+	if (!HandmadeHeroMachine) { exec_command(app, hide_filebar); }
+	exec_command(app, change_active_panel);
+
+	change_theme(app, literal("Handmade Hero"));
+	set_global_face_by_name(app, literal("Droid Sans Mono"), true);
+	UpdateModalIndicator(app);
+
+	return(0);
+}
 
 extern "C" GET_BINDING_DATA(get_bindings)
 {
-    Bind_Helper context_actual = begin_bind_helper(data, size);
-    Bind_Helper *context = &context_actual;
-    
-    set_hook(context, hook_start, casey_start);
-    set_command_caller(context, default_command_caller);
-    set_open_file_hook(context, casey_file_settings);
-    set_scroll_rule(context, casey_smooth_scroll_rule);
-    
-    EnumWindows(win32_find_4coder_window, 0);
-    
-    begin_map(context, mapid_global);
-    {
-        bind(context, 'z', MDFR_NONE, cmdid_interactive_open);
-        bind(context, 'x', MDFR_NONE, casey_open_in_other);
-        bind(context, 't', MDFR_NONE, casey_load_todo);
-        bind(context, '/', MDFR_NONE, change_active_panel);
-        bind(context, 'b', MDFR_NONE, cmdid_interactive_switch_buffer);
-        bind(context, key_page_up, MDFR_NONE, search);
-        bind(context, key_page_down, MDFR_NONE, reverse_search);
-        bind(context, 'm', MDFR_NONE, casey_save_and_make_without_asking);
-        bind(context, key_mouse_left, MDFR_NONE, click_set_cursor);
-    }
-    end_map(context);
-    
-    begin_map(context, mapid_file);
-    
-    bind_vanilla_keys(context, write_character);
-    
-    bind(context, key_insert, MDFR_NONE, begin_free_typing);
-    bind(context, '`', MDFR_NONE, begin_free_typing);
-    bind(context, key_esc, MDFR_NONE, end_free_typing);
-    bind(context, '\n', MDFR_NONE, casey_newline_and_indent);
-    bind(context, '\n', MDFR_SHIFT, casey_newline_and_indent);
-    
-    // MODAL KEYS
-    bind(context, ' ', MDFR_NONE, modal_space);
-    bind(context, ' ', MDFR_SHIFT, modal_space);
-    
-    bind(context, '\\', MDFR_NONE, modal_back_slash);
-    bind(context, '\'', MDFR_NONE, modal_single_quote);
-    bind(context, ',', MDFR_NONE, modal_comma);
-    bind(context, '.', MDFR_NONE, modal_period);
-    bind(context, '/', MDFR_NONE, modal_forward_slash);
-    bind(context, ';', MDFR_NONE, modal_semicolon);
-    bind(context, '[', MDFR_NONE, modal_open_bracket);
-    bind(context, ']', MDFR_NONE, modal_close_bracket);
-    bind(context, '{', MDFR_NONE, write_and_auto_tab);
-    bind(context, '}', MDFR_NONE, write_and_auto_tab);
-    bind(context, 'a', MDFR_NONE, modal_a);
-    bind(context, 'b', MDFR_NONE, modal_b);
-    bind(context, 'c', MDFR_NONE, modal_c);
-    bind(context, 'd', MDFR_NONE, modal_d);
-    bind(context, 'e', MDFR_NONE, modal_e);
-    bind(context, 'f', MDFR_NONE, modal_f);
-    bind(context, 'g', MDFR_NONE, modal_g);
-    bind(context, 'h', MDFR_NONE, modal_h);
-    bind(context, 'i', MDFR_NONE, modal_i);
-    bind(context, 'j', MDFR_NONE, modal_j);
-    bind(context, 'k', MDFR_NONE, modal_k);
-    bind(context, 'l', MDFR_NONE, modal_l);
-    bind(context, 'm', MDFR_NONE, modal_m);
-    bind(context, 'n', MDFR_NONE, modal_n);
-    bind(context, 'o', MDFR_NONE, modal_o);
-    bind(context, 'q', MDFR_NONE, modal_q);
-    bind(context, 'r', MDFR_NONE, modal_r);
-    bind(context, 's', MDFR_NONE, modal_s);
-    bind(context, 't', MDFR_NONE, modal_t);
-    bind(context, 'u', MDFR_NONE, modal_u);
-    bind(context, 'v', MDFR_NONE, modal_v);
-    bind(context, 'w', MDFR_NONE, modal_w);
-    bind(context, 'x', MDFR_NONE, modal_x);
-    bind(context, 'y', MDFR_NONE, modal_y);
-    bind(context, 'z', MDFR_NONE, modal_z);
-    
-    bind(context, '1', MDFR_NONE, modal_1);
-    bind(context, '2', MDFR_NONE, modal_2);
-    bind(context, '3', MDFR_NONE, modal_3);
-    bind(context, '4', MDFR_NONE, modal_4);
-    bind(context, '5', MDFR_NONE, modal_5);
-    bind(context, '6', MDFR_NONE, modal_6);
-    bind(context, '7', MDFR_NONE, modal_7);
-    bind(context, '8', MDFR_NONE, modal_8);
-    bind(context, '9', MDFR_NONE, modal_9);
-    bind(context, '0', MDFR_NONE, modal_0);
-    bind(context, '-', MDFR_NONE, modal_minus);
-    bind(context, '=', MDFR_NONE, modal_equals);
-    
-    bind(context, key_back, MDFR_NONE, modal_backspace);
-    bind(context, key_back, MDFR_SHIFT, modal_backspace);
-    
-    bind(context, key_up, MDFR_NONE, modal_up);
-    bind(context, key_up, MDFR_SHIFT, modal_up);
-    
-    bind(context, key_down, MDFR_NONE, modal_down);
-    bind(context, key_down, MDFR_SHIFT, modal_down);
-    
-    bind(context, key_left, MDFR_NONE, modal_left);
-    bind(context, key_left, MDFR_SHIFT, modal_left);
-    
-    bind(context, key_right, MDFR_NONE, modal_right);
-    bind(context, key_right, MDFR_SHIFT, modal_right);
-    
-    bind(context, key_del, MDFR_NONE, modal_delete);
-    bind(context, key_del, MDFR_SHIFT, modal_delete);
-    
-    bind(context, key_home, MDFR_NONE, modal_home);
-    bind(context, key_home, MDFR_SHIFT, modal_home);
-    
-    bind(context, key_end, MDFR_NONE, modal_end);
-    bind(context, key_end, MDFR_SHIFT, modal_end);
-    
-    bind(context, key_page_up, MDFR_NONE, modal_page_up);
-    bind(context, key_page_up, MDFR_SHIFT, modal_page_up);
-    
-    bind(context, key_page_down, MDFR_NONE, modal_page_down);
-    bind(context, key_page_down, MDFR_SHIFT, modal_page_down);
-    
-    bind(context, '\t', MDFR_NONE, modal_tab);
-    bind(context, '\t', MDFR_SHIFT, modal_tab);
-    
-    end_map(context);
-    
-    end_bind_helper(context);
-    return context->write_total;
+	Bind_Helper context_actual = begin_bind_helper(data, size);
+	Bind_Helper *context = &context_actual;
+
+	set_start_hook(context, casey_start);
+	set_command_caller(context, default_command_caller);
+	set_render_caller(context, default_render_caller);
+	set_open_file_hook(context, casey_file_settings);
+	set_scroll_rule(context, casey_smooth_scroll_rule);
+	set_end_file_hook(context, end_file_close_jump_list);
+
+	begin_map(context, mapid_global);
+	{
+		bind(context, 'z', MDFR_NONE, interactive_open_or_new);
+		bind(context, 'x', MDFR_NONE, casey_open_in_other);
+		bind(context, 't', MDFR_NONE, casey_load_todo);
+		bind(context, '/', MDFR_NONE, change_active_panel);
+		bind(context, 'b', MDFR_NONE, interactive_switch_buffer);
+		bind(context, key_page_up, MDFR_NONE, search);
+		bind(context, key_page_down, MDFR_NONE, reverse_search);
+		bind(context, 'm', MDFR_NONE, casey_save_and_make_without_asking);
+
+		// NOTE(allen): Added this so mouse would keep working rougly as before.
+		// Of course now there could be a modal click behavior if that will be useful.
+		// As well as right click.
+		bind(context, key_mouse_left, MDFR_NONE, click_set_cursor);
+	}
+	end_map(context);
+
+	begin_map(context, mapid_file);
+
+	bind_vanilla_keys(context, write_character);
+
+	// TODO(casey): How can I bind something to just pressing the control key by itself?
+	// bind(context, key_control, MDFR_NONE, end_free_typing);
+
+	bind(context, key_insert, MDFR_NONE, begin_free_typing);
+	bind(context, '`', MDFR_NONE, begin_free_typing);
+	bind(context, key_esc, MDFR_NONE, end_free_typing);
+	bind(context, '\n', MDFR_NONE, casey_newline_and_indent);
+	bind(context, '\n', MDFR_SHIFT, casey_newline_and_indent);
+
+	// NOTE(casey): Modal keys come here.
+	bind(context, ' ', MDFR_NONE, modal_space);
+	bind(context, ' ', MDFR_SHIFT, modal_space);
+
+	bind(context, '\\', MDFR_NONE, modal_back_slash);
+	bind(context, '\'', MDFR_NONE, modal_single_quote);
+	bind(context, ',', MDFR_NONE, modal_comma);
+	bind(context, '.', MDFR_NONE, modal_period);
+	bind(context, '/', MDFR_NONE, modal_forward_slash);
+	bind(context, ';', MDFR_NONE, modal_semicolon);
+	bind(context, '[', MDFR_NONE, modal_open_bracket);
+	bind(context, ']', MDFR_NONE, modal_close_bracket);
+	bind(context, '{', MDFR_NONE, write_and_auto_tab);
+	bind(context, '}', MDFR_NONE, write_and_auto_tab);
+	bind(context, 'a', MDFR_NONE, modal_a);
+	bind(context, 'b', MDFR_NONE, modal_b);
+	bind(context, 'c', MDFR_NONE, modal_c);
+	bind(context, 'd', MDFR_NONE, modal_d);
+	bind(context, 'e', MDFR_NONE, modal_e);
+	bind(context, 'f', MDFR_NONE, modal_f);
+	bind(context, 'g', MDFR_NONE, modal_g);
+	bind(context, 'h', MDFR_NONE, modal_h);
+	bind(context, 'i', MDFR_NONE, modal_i);
+	bind(context, 'j', MDFR_NONE, modal_j);
+	bind(context, 'k', MDFR_NONE, modal_k);
+	bind(context, 'l', MDFR_NONE, modal_l);
+	bind(context, 'm', MDFR_NONE, modal_m);
+	bind(context, 'n', MDFR_NONE, modal_n);
+	bind(context, 'o', MDFR_NONE, modal_o);
+	bind(context, 'p', MDFR_NONE, modal_p);
+	bind(context, 'q', MDFR_NONE, modal_q);
+	bind(context, 'r', MDFR_NONE, modal_r);
+	bind(context, 's', MDFR_NONE, modal_s);
+	bind(context, 't', MDFR_NONE, modal_t);
+	bind(context, 'u', MDFR_NONE, modal_u);
+	bind(context, 'v', MDFR_NONE, modal_v);
+	bind(context, 'w', MDFR_NONE, modal_w);
+	bind(context, 'x', MDFR_NONE, modal_x);
+	bind(context, 'y', MDFR_NONE, modal_y);
+	bind(context, 'z', MDFR_NONE, modal_z);
+
+	bind(context, '1', MDFR_NONE, modal_1);
+	bind(context, '2', MDFR_NONE, modal_2);
+	bind(context, '3', MDFR_NONE, modal_3);
+	bind(context, '4', MDFR_NONE, modal_4);
+	bind(context, '5', MDFR_NONE, modal_5);
+	bind(context, '6', MDFR_NONE, modal_6);
+	bind(context, '7', MDFR_NONE, modal_7);
+	bind(context, '8', MDFR_NONE, modal_8);
+	bind(context, '9', MDFR_NONE, modal_9);
+	bind(context, '0', MDFR_NONE, modal_0);
+	bind(context, '-', MDFR_NONE, modal_minus);
+	bind(context, '=', MDFR_NONE, modal_equals);
+
+	bind(context, key_back, MDFR_NONE, modal_backspace);
+	bind(context, key_back, MDFR_SHIFT, modal_backspace);
+
+	bind(context, key_up, MDFR_NONE, modal_up);
+	bind(context, key_up, MDFR_SHIFT, modal_up);
+
+	bind(context, key_down, MDFR_NONE, modal_down);
+	bind(context, key_down, MDFR_SHIFT, modal_down);
+
+	bind(context, key_left, MDFR_NONE, modal_left);
+	bind(context, key_left, MDFR_SHIFT, modal_left);
+
+	bind(context, key_right, MDFR_NONE, modal_right);
+	bind(context, key_right, MDFR_SHIFT, modal_right);
+
+	bind(context, key_del, MDFR_NONE, modal_delete);
+	bind(context, key_del, MDFR_SHIFT, modal_delete);
+
+	bind(context, key_home, MDFR_NONE, modal_home);
+	bind(context, key_home, MDFR_SHIFT, modal_home);
+
+	bind(context, key_end, MDFR_NONE, modal_end);
+	bind(context, key_end, MDFR_SHIFT, modal_end);
+
+	bind(context, key_page_up, MDFR_NONE, modal_page_up);
+	bind(context, key_page_up, MDFR_SHIFT, modal_page_up);
+
+	bind(context, key_page_down, MDFR_NONE, modal_page_down);
+	bind(context, key_page_down, MDFR_SHIFT, modal_page_down);
+
+	bind(context, '\t', MDFR_NONE, modal_tab);
+	bind(context, '\t', MDFR_SHIFT, modal_tab);
+
+	bind(context, key_f4, MDFR_ALT, exit_4coder);
+
+	end_map(context);
+
+	begin_map(context, default_lister_ui_map);
+	bind_vanilla_keys(context, lister__write_character);
+	bind(context, key_esc, MDFR_NONE, lister__quit);
+	bind(context, '\n', MDFR_NONE, lister__activate);
+	bind(context, '\t', MDFR_NONE, lister__activate);
+	bind(context, key_back, MDFR_NONE, lister__backspace_text_field);
+	bind(context, key_up, MDFR_NONE, lister__move_up);
+	bind(context, key_page_up, MDFR_NONE, lister__move_up);
+	bind(context, key_down, MDFR_NONE, lister__move_down);
+	bind(context, key_page_down, MDFR_NONE, lister__move_down);
+	bind(context, key_mouse_wheel, MDFR_NONE, lister__wheel_scroll);
+	bind(context, key_mouse_left, MDFR_NONE, lister__mouse_press);
+	bind(context, key_mouse_left_release, MDFR_NONE, lister__mouse_release);
+	bind(context, key_mouse_move, MDFR_NONE, lister__repaint);
+	bind(context, key_animate, MDFR_NONE, lister__repaint);
+	end_map(context);
+
+	end_bind_helper(context);
+	return context->write_total;
 }
