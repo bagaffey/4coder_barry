@@ -1210,15 +1210,15 @@ HOOK_SIG(casey_start)
 
 START_HOOK_SIG(casey_start)
 {
-	bool HandmadeHeroMachine = 1 == 1;
+	bool H = 1 == 1;
 
 	default_4coder_initialize(app);
 
 	exec_command(app, hide_scrollbar);
-	if (!HandmadeHeroMachine) { exec_command(app, hide_filebar); }
+	if (!H) { exec_command(app, hide_filebar); }
 	exec_command(app, open_panel_vsplit);
 	exec_command(app, hide_scrollbar);
-	if (!HandmadeHeroMachine) { exec_command(app, hide_filebar); }
+	if (!H) { exec_command(app, hide_filebar); }
 	exec_command(app, change_active_panel);
 
 	change_theme(app, literal("Handmade Hero"));
