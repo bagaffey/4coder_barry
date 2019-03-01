@@ -6,10 +6,6 @@
 #include "4coder_default_include.cpp"
 //#include "4coder_jump_parsing.cpp"
 
-#if !defined(Assert)
-#define Assert assert
-#endif
-
 #if !defined(internal)
 #define internal static
 #endif
@@ -870,13 +866,13 @@ UpdateModalIndicator(Application_Links *app)
 {
     Theme_Color normal_colors[] = 
     {
-        {Stag_Cursor, 0x40FF40},
+		{ Stag_Cursor, 0x40FF40},
         {Stag_At_Cursor, 0x161616},
         {Stag_Mark, 0x808080},
         {Stag_Margin, 0x262626},
         {Stag_Margin_Hover, 0x333333},
         {Stag_Margin_Active, 0x404040},
-        {Stag_Bar, 0xCACACA}
+		{ Stag_Bar, 0xCACACA}
     };
     
     Theme_Color edit_colors[] =
