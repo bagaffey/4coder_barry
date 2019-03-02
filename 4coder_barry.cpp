@@ -25,6 +25,7 @@ struct Parsed_Error
 };
 
 static bool GlobalEditMode;
+static bool GlobalBrightMode;
 static char *GlobalCompilationBufferName = "*compilation*";
 
 static char BuildDirectory[4096] = "./";
