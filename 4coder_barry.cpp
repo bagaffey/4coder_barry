@@ -208,10 +208,38 @@ IsCPP(String extension)
 }
 
 inline bool
+IsBee(String extension)
+{
+	bool Result = (match(extension, make_lit_string("bee")) != 0);
+
+	return(Result);
+}
+
+inline bool
+IsShader(String extension)
+{
+	bool Result = (match(extension, make_lit_string("ps")) ||
+		match(extension, make_lit_string("vs")) ||
+		match(extension, make_lit_string("cs")) ||
+		match(extension, make_lit_string("ts")) ||
+		match(extension, make_lit_string("gs")));
+
+	return(Result);
+}
+
+inline bool
 IsINL(String extension)
 {
     bool Result = (match(extension, make_lit_string("inl")) != 0);
     return(Result);
+}
+
+inline bool
+IsJavascript(String extension)
+{
+	bool Result = (match(extension, make_lit_string("js")) != 0);
+
+	return(Result);
 }
 
 inline bool
