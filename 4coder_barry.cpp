@@ -243,6 +243,14 @@ IsJavascript(String extension)
 }
 
 inline bool
+IsBAT(String extension)
+{
+	bool Result = (match(extension, make_lit_string("bat")) != 0);
+
+	return(Result);
+}
+
+inline bool
 IsCode(String extension)
 {
     bool Result = (IsH(extension) || IsCPP(extension) || IsINL(extension));
