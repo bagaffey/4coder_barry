@@ -297,6 +297,14 @@ IsCode(String extension)
     return(Result);
 }
 
+inline bool
+IsDoc(String extension)
+{
+	bool Result = (IsTXT(extension) || IsOutline(extension) || IsMollyWebMarkup(extension));
+
+	return(Result);
+}
+
 CUSTOM_COMMAND_SIG(casey_open_in_other)
 {
 	exec_command(app, change_active_panel);
