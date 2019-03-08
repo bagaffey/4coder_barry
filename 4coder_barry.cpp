@@ -259,6 +259,38 @@ IsTXT(String extension)
 }
 
 inline bool
+IsCMirror(String extension)
+{
+	bool Result = (match(extension, make_lit_string("cmirror")) != 0);
+
+	return(Result);
+}
+
+inline bool
+IsMTD(String extension)
+{
+	bool Result = (match(extension, make_lit_string("mtd")) != 0);
+
+	return(Result);
+}
+
+inline bool
+IsOutline(String extension)
+{
+	bool Result = (match(extension, make_lit_string("tol")) != 0);
+
+	return(Result);
+}
+
+inline bool
+IsMollyWebMarkup(String extension)
+{
+	bool Result = (match(extension, make_lit_string("mwm")) != 0);
+
+	return(Result);
+}
+
+inline bool
 IsCode(String extension)
 {
     bool Result = (IsH(extension) || IsCPP(extension) || IsINL(extension));
