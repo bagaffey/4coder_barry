@@ -347,6 +347,41 @@ CUSTOM_COMMAND_SIG(casey_switch_buffer_other_window)
 }
 
 internal void
+DeleteAfterMotion(struct Application_Links *app, Custom_Command_Function *motion)
+{
+	unsigned int access = AccessOpen;
+	View_Summary view = get_active_view(app, access);
+
+	int pos2 = view.cursor.pos;
+	motion(app);
+	refresh_view(app, &view);
+	int pos1 = view.cursor.pos;
+
+	Range range = make_range(pos1, pos2);
+
+	Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+
+	// NOTE(allen|a4.0.19): This 'paragraph' should fix 85% of whitespace problems, but if
+	// it has some issue, you can get the old behavior by just removing it. Doing it by
+	// cursor motion always seemed to introduce other problems spots.
+	if (range.min > 0 && range.max < buffer.size){
+		char before = buffer_get_char(app, &buffer, range.min - 1);
+		char after = buffer_get_char(app, &buffer, range.max);
+
+		if ((IsWhitespace(before) || before == '(') && IsWhitespace(after)){
+			if (after == ' '){
+				range.max += 1;
+			}
+			else if (before == ' '){
+				range.min -= 1;
+			}
+		}
+	}
+
+	buffer_replace_range(app, &buffer, range.min, range.max, 0, 0);
+}
+
+internal void
 DeleteAfterCommand(struct Application_Links *app, unsigned long long CommandID)
 {
     unsigned int access = AccessOpen;
