@@ -407,13 +407,14 @@ DeleteAfterCommand(struct Application_Links *app, unsigned long long CommandID)
 
 CUSTOM_COMMAND_SIG(casey_delete_token_left)
 {
-    DeleteAfterCommand(app, (unsigned long long)seek_white_or_token_left);
+	DeleteAfterMotion(app, seek_white_or_token_left);
 }
 
 CUSTOM_COMMAND_SIG(casey_delete_token_right)
 {
-    DeleteAfterCommand(app, (unsigned long long)seek_white_or_token_right);
+	DeleteAfterMotion(app, seek_white_or_token_right);
 }
+
 
 CUSTOM_COMMAND_SIG(casey_kill_to_end_of_line)
 {
