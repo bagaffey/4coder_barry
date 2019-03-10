@@ -500,7 +500,7 @@ SwitchToOrLoadFile(struct Application_Links *app, String FileName, bool CreateIf
     {
         if (file_exists(app, FileName.str, FileName.size) || CreateIfNotFound)
         {
-            view_open_file(app, &view, FileName.str, FileName.size, true);
+			view_open_file(app, &view, expand_str(FileName), false);
             
             Result.buffer = get_buffer_by_name(app, FileName.str, FileName.size, access);
             Result.Loaded = true;
