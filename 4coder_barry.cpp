@@ -512,8 +512,27 @@ SwitchToOrLoadFile(struct Application_Links *app, String FileName, bool CreateIf
 
 CUSTOM_COMMAND_SIG(casey_load_todo)
 {
-    String ToDoFileName = make_lit_string("todo.txt");
-    SwitchToOrLoadFile(app, ToDoFileName, true);
+	int size = app->memory_size / 2;
+	String dir = make_string(app->memory, 0, size);
+	String command = make_string((char*)app->memory + size, 0, size);
+
+	append(&dir, BuildDirectory);
+	for (int At = 0;
+		At < dir.size;
+		++At)
+	{
+		if (dir.str[At] == '/')
+		{
+			dir.str[At] = '\\';
+		}
+	}
+
+	append(&command, dir);
+
+	if (append(&command, "todo.tol"))
+	{
+		SwitchToOrLoadFile(app, command, true);
+	}
 }
 
 CUSTOM_COMMAND_SIG(casey_build_search)
