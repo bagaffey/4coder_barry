@@ -642,6 +642,7 @@ CUSTOM_COMMAND_SIG(casey_save_and_make_without_asking)
 {
     exec_command(app, change_active_panel);
     
+#if 0
     Buffer_Summary buffer = {};
     
     unsigned int access = AccessAll;
@@ -651,6 +652,8 @@ CUSTOM_COMMAND_SIG(casey_save_and_make_without_asking)
     {
         save_buffer(app, &buffer, buffer.file_name, buffer.file_name_len, 0);
     }
+#endif
+	save_all_dirty_buffers(app);
     
     int size = app->memory_size / 2;
     String dir = make_string(app->memory, 0, size);
@@ -669,21 +672,19 @@ CUSTOM_COMMAND_SIG(casey_save_and_make_without_asking)
     
     append(&command, dir);
     
-    if (append(&command, "build.bat"))
-    {
-        unsigned int access = AccessAll;
-        View_Summary view = get_active_view(app, access);
-        char *BufferName = GlobalCompilationBufferName;
-        int BufferNameLength = (int) strlen(GlobalCompilationBufferName);
-        exec_system_command(app, &view,
-                            buffer_identifier(BufferName, BufferNameLength),
-                            dir.str, dir.size,
-                            command.str, command.size,
-                            CLI_OverlapWithConflict);
-        lock_jump_buffer(BufferName, BufferNameLength);
-    }
-    
-    exec_command(app, change_active_panel);
+	if (append(&command, "build.bat"))
+	{
+		unsigned int access = AccessAll;
+		View_Summary view = get_active_view(app, access);
+		exec_system_command(app, &view, 
+			buffer_identifier(GlobalCompilationBufferName, (int)strlen(GlobalCompilationBufferName)),
+			dir.str, dir.size,
+			command.str, command.size,
+			CLI_OverlapWithConflict);
+		lock_jump_buffer(GlobalCompilationBufferName, str_size(GlobalCompilationBufferName));
+	}
+	exec_command(app, change_active_panel);
+
 	ZeroStruct(prev_location);
 }
 
