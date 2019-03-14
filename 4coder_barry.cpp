@@ -688,15 +688,27 @@ CUSTOM_COMMAND_SIG(casey_save_and_make_without_asking)
 	ZeroStruct(prev_location);
 }
 
+#if 1
 CUSTOM_COMMAND_SIG(casey_goto_previous_error)
 {
-    seek_error(app, &global_part, true, false, -1);
+	goto_prev_error_no_skips(app);
 }
 
 CUSTOM_COMMAND_SIG(casey_goto_next_error)
 {
-    seek_error(app, &global_part, true, false, 1);
+	goto_next_error_no_skips(app);
 }
+#else
+CUSTOM_COMMAND_SIG(casey_goto_previous_error)
+{
+	seek_error(app, &global_part, true, false, -1);
+}
+
+CUSTOM_COMMAND_SIG(casey_goto_next_error)
+{
+	seek_error(app, &global_part, true, false, 1);
+}
+#endif
 
 CUSTOM_COMMAND_SIG(casey_imenu)
 {
