@@ -944,71 +944,71 @@ GetNextString(char *Dest, int DestSize, char *&At)
 }
 
 internal void
-OpenProject(Application_Links *app, char *ProjectFileName)
+OpenProject(Application_Links *app, char *Contents)
 {
-    int TotalOpenAttempts = 0;
-    
-    FILE *ProjectFile = fopen(ProjectFileName, "r");
-    if (ProjectFile)
-    {
-        fgets(BuildDirectory, sizeof(BuildDirectory) - 1, ProjectFile);
-        size_t BuildDirSize = strlen(BuildDirectory);
-        if ((BuildDirSize) && (BuildDirectory[BuildDirSize - 1] == '\n'))
-        {
-            --BuildDirSize;
-        }
-        
-        if ((BuildDirSize) && (BuildDirectory[BuildDirSize - 1] != '/'))
-        {
-            BuildDirectory[BuildDirSize++] = '/';
-            BuildDirectory[BuildDirSize] = 0;
-        }
-        
-        char SourceFileDirectoryName[4096];
-        char FileDirectoryName[4096];
-        while (fgets(SourceFileDirectoryName, sizeof(SourceFileDirectoryName) - 1, ProjectFile))
-        {
-            String dir = make_string(FileDirectoryName, 0, sizeof(FileDirectoryName));
-            append(&dir, SourceFileDirectoryName);
-            if (dir.size && dir.str[dir.size - 1] == '\n')
-            {
-                --dir.size;
-            }
-            
-            if (dir.size && dir.str[dir.size - 1] != '/')
-            {
-                dir.str[dir.size++] = '/';
-            }
-            
-            File_List list = get_file_list(app, dir.str, dir.size);
-            int dir_size = dir.size;
-            
-            for (unsigned int i = 0; i < list.count; ++i)
-            {
-                File_Info *info = list.infos + i;
-                if (!info->folder)
-                {
-                    String filename = make_string(info->filename, info->filename_len);
-                    String extension = file_extension(filename);
-                    if (IsCode(extension))
-                    {
-                        // 4coder API cannot use relative paths a.t.m.
-                        // Everything must be full paths.
-                        // Set the dir string size back to what it was originally
-                        // That way, new appends overwrite old ones.
-                        dir.size = dir_size;
-                        append(&dir, info->filename);
-                        
-                        open_file(app, 0, dir.str, dir.size, true, true);
-                        ++TotalOpenAttempts;
-                    }
-                }
-            }
-            
-            free_file_list(app, list);
-        }
-        fclose(ProjectFile);
-    }
+	int TotalOpenAttempts = 0;
+	char *At = Contents;
+
+	if (GetNextString(BuildDirectory, sizeof(BuildDirectory) - 1, At))
+	{
+		size_t BuildDirSize = strlen(BuildDirectory);
+		if ((BuildDirSize) && (BuildDirectory[BuildDirSize - 1] == '\n'))
+		{
+			--BuildDirSize;
+		}
+
+		if ((BuildDirSize) && (BuildDirectory[BuildDirSize - 1] != '/'))
+		{
+			BuildDirectory[BuildDirSize++] = '/';
+			BuildDirectory[BuildDirSize] = 0;
+		}
+	}
+
+	char SourceFileDirectoryName[4096];
+	char FileDirectoryName[4096];
+	while (GetNextString(SourceFileDirectoryName, sizeof(SourceFileDirectoryName) - 1, At))
+	{
+		// NOTE(allen|a3.4.4): Here we get the list of files in this directory.
+		// Notice that we free_file_list at the end.
+		String dir = make_string(FileDirectoryName, 0, sizeof(FileDirectoryName));
+		append(&dir, SourceFileDirectoryName);
+		if (dir.size && dir.str[dir.size - 1] == '\n')
+		{
+			--dir.size;
+		}
+
+		if (dir.size && dir.str[dir.size - 1] != '/')
+		{
+			dir.str[dir.size++] = '/';
+		}
+
+		File_List list = get_file_list(app, dir.str, dir.size);
+		int dir_size = dir.size;
+
+		for (int unsigned i = 0; i < list.count; ++i)
+		{
+			File_Info *info = list.infos + i;
+			if (!info->folder)
+			{
+				String filename = make_string(info->filename, info->filename_len);
+				String extension = file_extension(filename);
+				if (IsCode(extension) || IsDoc(extension))
+				{
+					// NOTE(allen): There's no way in the 4coder API to use relative
+					// paths at the moment, so everything should be full paths.  Which is
+					// managable.  Here simply set the dir string size back to where it
+					// was originally, so that new appends overwrite old ones.
+					dir.size = dir_size;
+					append(&dir, info->filename);
+
+					open_file(app, 0, dir.str, dir.size, true, true);
+					++TotalOpenAttempts;
+				}
+			}
+		}
+
+		free_file_list(app, list);
+	}
 }
 
 CUSTOM_COMMAND_SIG(casey_execute_arbitrary_command)
