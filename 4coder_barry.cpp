@@ -915,6 +915,34 @@ CUSTOM_COMMAND_SIG(casey_quick_calc)
     free(Stuff);
 }
 
+internal char *
+GetNextString(char *Dest, int DestSize, char *&At)
+{
+	char *Result = 0;
+
+	if (*At)
+	{
+		Result = Dest;
+		while ((--DestSize > 0) && *At && (*At != '\n'))
+		{
+			*Dest++ = *At++;
+		}
+		*Dest = 0;
+
+		while (*At && (*At != '\n'))
+		{
+			++At;
+		}
+
+		while (*At && (*At == '\n'))
+		{
+			++At;
+		}
+	}
+
+	return(Result);
+}
+
 internal void
 OpenProject(Application_Links *app, char *ProjectFileName)
 {
