@@ -1023,6 +1023,70 @@ IsCodeLegal(int32_t Codepoint)
 	return(Result);
 }
 
+CUSTOM_COMMAND_SIG(casey_force_codelegal_characters)
+{
+	View_Summary view = get_active_view(app, AccessOpen);
+	Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessOpen);
+
+	int32_t line_count = buffer.line_count;
+	int32_t edit_max = line_count;
+
+	if (edit_max*(int32_t)sizeof(Buffer_Edit) < app->memory_size){
+		Buffer_Edit *edits = (Buffer_Edit*)app->memory;
+
+		char data[1024];
+		Stream_Chunk chunk = {};
+
+		int32_t i = 0;
+		int32_t last_utf = 0;
+		int32_t run = 0;
+
+		if (init_stream_chunk(&chunk, app, &buffer, i, data, sizeof(data))){
+			Buffer_Edit *edit = edits;
+
+			do
+			{
+				for (; i < chunk.end; ++i)
+				{
+					if (IsCodeLegal(chunk.data[i]))
+					{
+						if (run)
+						{
+							edit->str_start = 0;
+							edit->len = 1;
+							edit->start = last_utf;
+							edit->end = i;
+							++edit;
+
+							run = false;
+						}
+					}
+					else if (!run)
+					{
+						last_utf = i;
+
+						run = true;
+					}
+				}
+			} while (forward_stream_chunk(&chunk));
+
+			if (run)
+			{
+				edit->str_start = 0;
+				edit->len = 1;
+				edit->start = last_utf;
+				edit->end = i;
+				++edit;
+
+				run = false;
+			}
+
+			int32_t edit_count = (int32_t)(edit - edits);
+			buffer_batch_edit(app, &buffer, " ", 1, edits, edit_count, BatchEdit_PreserveTokens);
+		}
+	}
+}
+
 CUSTOM_COMMAND_SIG(casey_execute_arbitrary_command)
 {
     Query_Bar bar;
