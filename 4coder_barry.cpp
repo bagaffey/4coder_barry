@@ -1011,6 +1011,18 @@ OpenProject(Application_Links *app, char *Contents)
 	}
 }
 
+inline int
+IsCodeLegal(int32_t Codepoint)
+{
+	int Result = ((Codepoint == '\n') ||
+		(Codepoint == '\t') ||
+		(Codepoint == '\r') ||
+		((Codepoint >= 32) &&
+		(Codepoint <= 126)));
+
+	return(Result);
+}
+
 CUSTOM_COMMAND_SIG(casey_execute_arbitrary_command)
 {
     Query_Bar bar;
