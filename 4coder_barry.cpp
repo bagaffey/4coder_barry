@@ -1332,6 +1332,22 @@ goto mode1;
 	}
 }
 
+internal void
+ClearDeclsBuffer(Application_Links *app, Buffer_Summary *decls_buffer)
+{
+	String search_name = make_lit_string("*decls*");
+	*decls_buffer = get_buffer_by_name(app, search_name.str, search_name.size, AccessAll);
+	if (!decls_buffer->exists){
+		*decls_buffer = create_buffer(app, search_name.str, search_name.size, BufferCreate_AlwaysNew);
+		buffer_set_setting(app, decls_buffer, BufferSetting_Unimportant, true);
+		buffer_set_setting(app, decls_buffer, BufferSetting_ReadOnly, true);
+		buffer_set_setting(app, decls_buffer, BufferSetting_WrapLine, false);
+	}
+	else{
+		buffer_replace_range(app, decls_buffer, 0, decls_buffer->size, 0, 0);
+	}
+}
+
 CUSTOM_COMMAND_SIG(casey_execute_arbitrary_command)
 {
     Query_Bar bar;
