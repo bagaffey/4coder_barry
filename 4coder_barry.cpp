@@ -1348,6 +1348,16 @@ ClearDeclsBuffer(Application_Links *app, Buffer_Summary *decls_buffer)
 	}
 }
 
+CUSTOM_COMMAND_SIG(casey_list_all_functions_current_buffer){
+	uint32_t access = AccessProtected;
+	View_Summary view = get_active_view(app, access);
+	Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+
+	Buffer_Summary decls_buffer;
+	ClearDeclsBuffer(app, &decls_buffer);
+	casey_list_all_functions(app, &global_part, &buffer, &decls_buffer);
+}
+
 CUSTOM_COMMAND_SIG(casey_execute_arbitrary_command)
 {
     Query_Bar bar;
