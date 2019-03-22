@@ -1358,6 +1358,20 @@ CUSTOM_COMMAND_SIG(casey_list_all_functions_current_buffer){
 	casey_list_all_functions(app, &global_part, &buffer, &decls_buffer);
 }
 
+CUSTOM_COMMAND_SIG(casey_list_all_functions_globally){
+	uint32_t access = AccessProtected;
+
+	Buffer_Summary decls_buffer;
+	ClearDeclsBuffer(app, &decls_buffer);
+
+	for (Buffer_Summary buffer_it = get_buffer_first(app, access);
+		buffer_it.exists;
+		get_buffer_next(app, &buffer_it, access))
+	{
+		casey_list_all_functions(app, &global_part, &buffer_it, &decls_buffer);
+	}
+}
+
 CUSTOM_COMMAND_SIG(casey_execute_arbitrary_command)
 {
     Query_Bar bar;
