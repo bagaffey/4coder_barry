@@ -1406,35 +1406,57 @@ CUSTOM_COMMAND_SIG(casey_execute_arbitrary_command)
 internal void
 UpdateModalIndicator(Application_Links *app)
 {
-    Theme_Color normal_colors[] = 
-    {
-		{ Stag_Cursor, 0x40FF40},
-        {Stag_At_Cursor, 0x161616},
-        {Stag_Mark, 0x808080},
-        {Stag_Margin, 0x262626},
-        {Stag_Margin_Hover, 0x333333},
-        {Stag_Margin_Active, 0x404040},
-		{ Stag_Bar, 0xCACACA}
-    };
-    
-    Theme_Color edit_colors[] =
-    {
-        {Stag_Cursor, 0xFF0000},
-        {Stag_At_Cursor, 0x00FFFF},
-        {Stag_Mark, 0xFF6F1A},
-        {Stag_Margin, 0x33170B},
-        {Stag_Margin_Hover, 0x49200F},
-        {Stag_Margin_Active, 0x934420},
-        {Stag_Bar, 0x934420}
-    };
-    
-    if (GlobalEditMode) {
-        set_theme_colors(app, edit_colors, ArrayCount(edit_colors));
-    }
-    else
-    {
-        set_theme_colors(app, normal_colors, ArrayCount(normal_colors));
-    }
+	int unsigned Background = (GlobalBrightMode ? 0xFFFFFFFF : 0xFF161616);
+	int unsigned Default = (GlobalBrightMode ? 0xFF000000 : 0xFFA08563);
+	int unsigned Constant = 0xFF6B8E23;
+
+	Theme_Color normal_colors[] =
+	{
+		{ Stag_Cursor, 0xFF40FF40 },
+		{ Stag_At_Cursor, 0xFF161616 },
+		{ Stag_Mark, 0xFF808080 },
+		{ Stag_Bar, 0xFFCACACA }
+	};
+
+	Theme_Color edit_colors[] =
+	{
+		{ Stag_Cursor, 0xFFFF0000 },
+		{ Stag_At_Cursor, 0xFF00FFFF },
+		{ Stag_Mark, 0xFFFF6F1A },
+		{ Stag_Bar, 0xFFCACACA }
+	};
+
+	if (GlobalEditMode)
+	{
+		set_theme_colors(app, edit_colors, ArrayCount(edit_colors));
+	}
+	else
+	{
+		set_theme_colors(app, normal_colors, ArrayCount(normal_colors));
+	}
+
+	Theme_Color common_colors[] =
+	{
+		{ Stag_Comment, 0xFF7D7D7D },
+		{ Stag_Keyword, 0xFFCD950C },
+		{ Stag_Preproc, 0xFFDAB98F },
+		{ Stag_Include, Constant },
+		{ Stag_Back, Background },
+		{ Stag_Margin, Background },
+		{ Stag_Margin_Hover, Background },
+		{ Stag_Margin_Active, Background },
+		{ Stag_List_Item, Background },
+		{ Stag_List_Item_Hover, 0xFF934420 },
+		{ Stag_List_Item_Active, 0xFF934420 },
+		{ Stag_Default, Default },
+
+		{ Stag_Str_Constant, Constant },
+		{ Stag_Char_Constant, Constant },
+		{ Stag_Int_Constant, Constant },
+		{ Stag_Float_Constant, Constant },
+		{ Stag_Bool_Constant, Constant },
+	};
+	set_theme_colors(app, common_colors, ArrayCount(common_colors));
 }
 
 CUSTOM_COMMAND_SIG(begin_free_typing)
