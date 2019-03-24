@@ -1471,6 +1471,12 @@ CUSTOM_COMMAND_SIG(end_free_typing)
     UpdateModalIndicator(app);
 }
 
+CUSTOM_COMMAND_SIG(toggle_bright_mode)
+{
+	GlobalBrightMode = !GlobalBrightMode;
+	UpdateModalIndicator(app);
+}
+
 #define DEFINE_FULL_BIMODAL_KEY(binding_name, edit_code, normal_code) \
 CUSTOM_COMMAND_SIG(binding_name) \
 { \
