@@ -1504,7 +1504,7 @@ DEFINE_MODAL_KEY(modal_single_quote, casey_call_keyboard_macro);
 DEFINE_MODAL_KEY(modal_comma, seek_whitespace_down);
 DEFINE_MODAL_KEY(modal_period, casey_fill_paragraph);
 DEFINE_MODAL_KEY(modal_forward_slash, change_active_panel);
-DEFINE_MODAL_KEY(modal_semicolon, cursor_mark_swap); // cmdid_history_backward?
+DEFINE_MODAL_KEY(modal_semicolon, seek_white_or_token_right);
 DEFINE_BIMODAL_KEY(modal_open_bracket, casey_begin_keyboard_macro_recording, write_and_auto_tab);
 DEFINE_BIMODAL_KEY(modal_close_bracket, casey_end_keyboard_macro_recording, write_and_auto_tab);
 DEFINE_MODAL_KEY(modal_a, write_character); // Arbitrary command + casey_quick_calc
