@@ -1501,7 +1501,7 @@ CUSTOM_COMMAND_SIG(binding_name) \
 DEFINE_MODAL_KEY(modal_space, set_mark);
 DEFINE_MODAL_KEY(modal_back_slash, casey_clean_and_save);
 DEFINE_MODAL_KEY(modal_single_quote, casey_call_keyboard_macro);
-DEFINE_MODAL_KEY(modal_comma, casey_goto_previous_error);
+DEFINE_MODAL_KEY(modal_comma, seek_whitespace_down);
 DEFINE_MODAL_KEY(modal_period, casey_fill_paragraph);
 DEFINE_MODAL_KEY(modal_forward_slash, change_active_panel);
 DEFINE_MODAL_KEY(modal_semicolon, cursor_mark_swap); // cmdid_history_backward?
