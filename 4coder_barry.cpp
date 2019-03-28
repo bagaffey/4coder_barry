@@ -1511,7 +1511,7 @@ DEFINE_MODAL_KEY(modal_a, write_character); // Arbitrary command + casey_quick_c
 DEFINE_MODAL_KEY(modal_b, interactive_switch_buffer);
 DEFINE_MODAL_KEY(modal_c, casey_find_corresponding_file);
 DEFINE_MODAL_KEY(modal_d, casey_kill_to_end_of_line);
-DEFINE_MODAL_KEY(modal_e, list_all_locations);
+DEFINE_MODAL_KEY(modal_e, write_character);
 DEFINE_MODAL_KEY(modal_f, casey_paste_and_tab);
 DEFINE_MODAL_KEY(modal_g, goto_line);
 DEFINE_MODAL_KEY(modal_h, auto_tab_range);
