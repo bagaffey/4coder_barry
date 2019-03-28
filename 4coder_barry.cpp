@@ -1514,7 +1514,7 @@ DEFINE_MODAL_KEY(modal_d, casey_kill_to_end_of_line);
 DEFINE_MODAL_KEY(modal_e, write_character);
 DEFINE_MODAL_KEY(modal_f, casey_paste_and_tab);
 DEFINE_MODAL_KEY(modal_g, goto_line);
-DEFINE_MODAL_KEY(modal_h, auto_tab_range);
+DEFINE_MODAL_KEY(modal_h, seek_white_or_token_left);
 DEFINE_MODAL_KEY(modal_i, move_up);
 DEFINE_MODAL_KEY(modal_j, seek_white_or_token_left);
 DEFINE_MODAL_KEY(modal_k, move_down);
