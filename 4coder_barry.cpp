@@ -1520,7 +1520,7 @@ DEFINE_MODAL_KEY(modal_j, casey_list_all_functions_globally);
 DEFINE_MODAL_KEY(modal_k, list_all_locations);
 DEFINE_MODAL_KEY(modal_l, list_all_substring_locations_case_insensitive);
 DEFINE_MODAL_KEY(modal_m, casey_save_and_make_without_asking);
-DEFINE_MODAL_KEY(modal_n, casey_goto_next_error);
+DEFINE_MODAL_KEY(modal_n, goto_next_error);
 DEFINE_MODAL_KEY(modal_o, query_replace);
 DEFINE_MODAL_KEY(modal_p, replace_in_range);
 DEFINE_MODAL_KEY(modal_q, copy);
