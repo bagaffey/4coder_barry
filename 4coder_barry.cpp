@@ -1531,7 +1531,7 @@ DEFINE_MODAL_KEY(modal_u, cmdid_undo);
 DEFINE_MODAL_KEY(modal_v, casey_switch_buffer_other_window);
 DEFINE_MODAL_KEY(modal_w, cut);
 DEFINE_MODAL_KEY(modal_x, casey_find_corresponding_file_other_window);
-DEFINE_MODAL_KEY(modal_y, cmdid_redo);
+DEFINE_MODAL_KEY(modal_y, redo);
 DEFINE_MODAL_KEY(modal_z, interactive_open_or_new);
 
 // All write_character's are available for being assigned a command.
