@@ -1539,7 +1539,7 @@ DEFINE_MODAL_KEY(modal_1, casey_build_search);
 DEFINE_MODAL_KEY(modal_2, write_character);
 DEFINE_MODAL_KEY(modal_3, write_character);
 DEFINE_MODAL_KEY(modal_4, write_character);
-DEFINE_MODAL_KEY(modal_5, write_character);
+DEFINE_MODAL_KEY(modal_5, toggle_bright_mode);
 DEFINE_MODAL_KEY(modal_6, write_character);
 DEFINE_MODAL_KEY(modal_7, write_character);
 DEFINE_MODAL_KEY(modal_8, write_character);
