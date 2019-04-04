@@ -1540,7 +1540,7 @@ DEFINE_MODAL_KEY(modal_2, write_character);
 DEFINE_MODAL_KEY(modal_3, write_character);
 DEFINE_MODAL_KEY(modal_4, write_character);
 DEFINE_MODAL_KEY(modal_5, toggle_bright_mode);
-DEFINE_MODAL_KEY(modal_6, write_character);
+DEFINE_MODAL_KEY(modal_6, auto_tab_range);
 DEFINE_MODAL_KEY(modal_7, write_character);
 DEFINE_MODAL_KEY(modal_8, write_character);
 DEFINE_MODAL_KEY(modal_9, write_character);
