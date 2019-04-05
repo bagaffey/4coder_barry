@@ -1542,7 +1542,7 @@ DEFINE_MODAL_KEY(modal_4, write_character);
 DEFINE_MODAL_KEY(modal_5, toggle_bright_mode);
 DEFINE_MODAL_KEY(modal_6, auto_tab_range);
 DEFINE_MODAL_KEY(modal_7, write_character);
-DEFINE_MODAL_KEY(modal_8, write_character);
+DEFINE_MODAL_KEY(modal_8, seek_whitespace_up);
 DEFINE_MODAL_KEY(modal_9, write_character);
 DEFINE_MODAL_KEY(modal_0, kill_buffer);
 DEFINE_MODAL_KEY(modal_minus, write_character);
