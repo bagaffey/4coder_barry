@@ -1546,7 +1546,7 @@ DEFINE_MODAL_KEY(modal_8, seek_whitespace_up);
 DEFINE_MODAL_KEY(modal_9, write_character);
 DEFINE_MODAL_KEY(modal_0, kill_buffer);
 DEFINE_MODAL_KEY(modal_minus, write_character);
-DEFINE_MODAL_KEY(modal_equals, casey_execute_arbitrary_command);
+DEFINE_MODAL_KEY(modal_equals, command_lister);
 
 DEFINE_BIMODAL_KEY(modal_backspace, casey_delete_token_left, backspace_char);
 DEFINE_BIMODAL_KEY(modal_up, move_up, move_up);
