@@ -1562,28 +1562,65 @@ DEFINE_BIMODAL_KEY(modal_tab, word_complete, word_complete);
 
 OPEN_FILE_HOOK_SIG(casey_file_settings)
 {
-    unsigned int access = AccessAll;
-    Buffer_Summary buffer = get_buffer(app, buffer_id, access);
-    
-    int treat_as_code = 0;
-    int treat_as_project = 0;
-    
-    if (buffer.file_name && buffer.size < (16 << 20))
-    {
-        String ext = file_extension(make_string(buffer.file_name, buffer.file_name_len));
-        treat_as_code = IsCode(ext);
-        treat_as_project = match(ext, make_lit_string("prj"));
-    }
-    
-    buffer_set_setting(app, &buffer, BufferSetting_Lex, treat_as_code);
-    buffer_set_setting(app, &buffer, BufferSetting_WrapLine, !treat_as_code);
-    buffer_set_setting(app, &buffer, BufferSetting_MapID, mapid_file);
-    
-    if (treat_as_project)
-    {
-        OpenProject(app, buffer.file_name);
-    }
-    return (0);
+	// NOTE(allen|a4): As of alpha 4 hooks can have parameters which are
+	// received through functions like this get_parameter_buffer.
+	// This is different from the past where this hook got a buffer
+	// from get_active_buffer.
+	unsigned int access = AccessAll;
+	//Buffer_Summary buffer = get_parameter_buffer(app, 0, access);
+	Buffer_Summary buffer = get_buffer(app, buffer_id, access);
+
+	int treat_as_code = 0;
+	int treat_as_project = 0;
+	int treat_as_doc = 0;
+	int treat_as_outline = 0;
+	int wrap_lines = 1;
+	int WrapPosition = 1200;
+
+	if (buffer.file_name && buffer.size < (16 << 20))
+	{
+		String ext = file_extension(make_string(buffer.file_name, buffer.file_name_len));
+		treat_as_code = IsCode(ext);
+		treat_as_project = match(ext, make_lit_string("prj"));
+		treat_as_doc = IsDoc(ext);
+		treat_as_outline = IsOutline(ext);
+	}
+
+	if (treat_as_outline)
+	{
+		buffer_set_setting(app, &buffer, BufferSetting_VirtualWhitespace, 1);
+		buffer_set_setting(app, &buffer, BufferSetting_LexWithoutStrings, 1);
+	}
+	else if (treat_as_code)
+	{
+		buffer_set_setting(app, &buffer, BufferSetting_Lex, treat_as_code);
+		buffer_set_setting(app, &buffer, BufferSetting_WrapLine, 0);
+	}
+	else if (treat_as_doc)
+	{
+		buffer_set_setting(app, &buffer, BufferSetting_WrapIndicator, WrapIndicator_Hide);
+		buffer_set_setting(app, &buffer, BufferSetting_WrapLine, 1);
+		WrapPosition = 600;
+	}
+	else
+	{
+		buffer_set_setting(app, &buffer, BufferSetting_WrapLine, wrap_lines);
+	}
+
+	buffer_set_setting(app, &buffer, BufferSetting_MapID, mapid_file);
+	buffer_set_setting(app, &buffer, BufferSetting_WrapPosition, WrapPosition);
+
+	if (treat_as_project)
+	{
+		int size = buffer.size;
+		char *ParsingRegion = (char *)malloc(size + 1);
+		buffer_read_range(app, &buffer, 0, size, ParsingRegion);
+		ParsingRegion[size] = 0;
+		OpenProject(app, ParsingRegion);
+		free(ParsingRegion);
+	}
+
+	return(0);
 }
 
 bool
