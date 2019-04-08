@@ -1668,7 +1668,7 @@ struct Casey_Scroll_Velocity
     float x, y, t;
 };
 
-Casey_Scroll_Velocity casey_scroll_velocity_[16] = {0};
+Casey_Scroll_Velocity casey_scroll_velocity_[16] = {};
 Casey_Scroll_Velocity *casey_scroll_velocity = casey_scroll_velocity_ - 1;
 
 SCROLL_RULE_SIG(casey_smooth_scroll_rule) {
