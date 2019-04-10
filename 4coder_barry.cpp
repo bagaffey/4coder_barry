@@ -1704,20 +1704,6 @@ SCROLL_RULE_SIG(casey_smooth_scroll_rule) {
 #pragma comment(lib, "user32.lib")
 static HWND GlobalWindowHandle;
 static WINDOWPLACEMENT GlobalWindowPosition = { sizeof(GlobalWindowPosition) };
-internal BOOL CALLBACK win32_find_4coder_window(HWND Window, LPARAM LParam)
-{
-    BOOL Result = TRUE;
-    
-    char TestClassName[256];
-    GetClassName(Window, TestClassName, sizeof(TestClassName));
-    if ((strcmp("4coder-win32-wndclass", TestClassName) == 0) &&
-        ((HINSTANCE)GetWindowLongPtr(Window, GWLP_HINSTANCE) == GetModuleHandle(0)))
-    {
-        GlobalWindowHandle = Window;
-        Result = FALSE;
-    }
-    return(Result);
-}
 
 internal void
 win32_toggle_fullscreen(void)
