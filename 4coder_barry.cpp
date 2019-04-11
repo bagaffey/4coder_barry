@@ -1791,8 +1791,6 @@ HOOK_SIG(casey_start)
     };
     set_theme_colors(app, colors, ArrayCount(colors));
     
-    win32_toggle_fullscreen();
-    
     return(0);
 }
 #endif
