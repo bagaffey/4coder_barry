@@ -1705,14 +1705,6 @@ SCROLL_RULE_SIG(casey_smooth_scroll_rule) {
 static HWND GlobalWindowHandle;
 static WINDOWPLACEMENT GlobalWindowPosition = { sizeof(GlobalWindowPosition) };
 
-internal void
-win32_toggle_fullscreen(void)
-{
-    ShowWindow(GlobalWindowHandle, SW_MAXIMIZE);
-}
-
-
-
 #if 0
 HOOK_SIG(casey_start)
 {
