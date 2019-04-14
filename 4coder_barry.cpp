@@ -1703,7 +1703,6 @@ SCROLL_RULE_SIG(casey_smooth_scroll_rule) {
 #include <windows.h>
 #pragma comment(lib, "user32.lib")
 static HWND GlobalWindowHandle;
-static WINDOWPLACEMENT GlobalWindowPosition = { sizeof(GlobalWindowPosition) };
 
 #if 0
 HOOK_SIG(casey_start)
