@@ -1700,9 +1700,6 @@ SCROLL_RULE_SIG(casey_smooth_scroll_rule) {
     return (result);
 }
 
-#include <windows.h>
-#pragma comment(lib, "user32.lib")
-
 #if 0
 HOOK_SIG(casey_start)
 {
