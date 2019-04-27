@@ -1746,7 +1746,6 @@ HOOK_SIG(casey_start)
         // { Stag_Undo, },
         // { Stag_Next_Undo, },
     };
-    set_theme_colors(app, colors, ArrayCount(colors));
     
     return(0);
 }
