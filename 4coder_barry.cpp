@@ -1744,7 +1744,6 @@ HOOK_SIG(casey_start)
         // { Stag_Highlight_Write, },
         // { Stag_Paste, },
         // { Stag_Undo, },
-        // { Stag_Next_Undo, },
     };
     
     return(0);
