@@ -1742,7 +1742,6 @@ HOOK_SIG(casey_start)
         // { Stag_Special_Character, },
         // { Stag_Highlight_Junk, },
         // { Stag_Highlight_Write, },
-        // { Stag_Paste, },
     };
     
     return(0);
