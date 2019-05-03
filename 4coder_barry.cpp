@@ -1740,7 +1740,6 @@ HOOK_SIG(casey_start)
         { Stag_Preproc, 0x3f51b5 },
         { Stag_Include, 0xc0c1c2 },
         // { Stag_Special_Character, },
-        // { Stag_Highlight_Junk, },
     };
     
     return(0);
