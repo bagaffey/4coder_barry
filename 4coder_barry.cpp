@@ -1741,7 +1741,6 @@ HOOK_SIG(casey_start)
         { Stag_Include, 0xc0c1c2 },
         // { Stag_Special_Character, },
         // { Stag_Highlight_Junk, },
-        // { Stag_Highlight_Write, },
     };
     
     return(0);
