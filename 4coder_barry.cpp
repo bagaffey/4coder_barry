@@ -1738,8 +1738,7 @@ HOOK_SIG(casey_start)
         // { Stag_Float_Constant, },
         // { Stag_Bool_Constant, },
         { Stag_Preproc, 0x3f51b5 },
-        { Stag_Include, 0xc0c1c2 },
-        // { Stag_Special_Character, },
+        { Stag_Include, 0xc0c1c2 }
     };
     
     return(0);
