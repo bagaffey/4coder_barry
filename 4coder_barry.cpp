@@ -1723,7 +1723,6 @@ HOOK_SIG(casey_start)
         // { Stag_Back, },
         // { Stag_Margin, },
         // { Stag_Margin_Hover, },
-        // { Stag_Margin_Active, },
         { Stag_Comment, 0xff9800 },
         { Stag_Keyword, 0x5e98ba },
         { Stag_Preproc, 0x3f51b5 },
