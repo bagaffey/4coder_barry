@@ -1715,7 +1715,6 @@ HOOK_SIG(casey_start)
     Theme_Color colors[] =
     {
         { Stag_Default, 0x00e676 },
-        // { Stag_Bar, },
         { Stag_Comment, 0xff9800 },
         { Stag_Keyword, 0x5e98ba },
         { Stag_Preproc, 0x3f51b5 },
