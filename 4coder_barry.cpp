@@ -1714,7 +1714,6 @@ HOOK_SIG(casey_start)
     
     Theme_Color colors[] =
     {
-        { Stag_Comment, 0xff9800 },
     };
     
     return(0);
