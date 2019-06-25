@@ -1709,7 +1709,6 @@ HOOK_SIG(casey_start)
     exec_command(app, hide_scrollbar);
     exec_command(app, change_active_panel);
     
-    change_theme(app, literal("Handmade Hero"));
     change_font(app, literal("Liberation Mono"), true);
     
     Theme_Color colors[] =
