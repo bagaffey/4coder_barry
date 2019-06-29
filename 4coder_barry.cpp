@@ -19,7 +19,6 @@ struct Parsed_Error
   String target_file_name;
   int target_line_number;
   int target_column_number;
-  
   int source_buffer_id;
   int source_position;
 };
