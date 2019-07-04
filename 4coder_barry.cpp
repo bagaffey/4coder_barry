@@ -19,6 +19,7 @@ struct Parsed_Error
   String target_file_name;
   int target_line_number;
   int target_column_number;
+  
   int source_buffer_id;
   int source_position;
 };
@@ -1702,7 +1703,6 @@ SCROLL_RULE_SIG(casey_smooth_scroll_rule) {
 #if 0
 HOOK_SIG(casey_start)
 {
-    
     exec_command(app, open_panel_vsplit);
     
     change_font(app, literal("Liberation Mono"), true);
