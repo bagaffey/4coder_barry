@@ -1708,8 +1708,7 @@ HOOK_SIG(casey_start)
     change_font(app, literal("Liberation Mono"), true);
     
     Theme_Color colors[] =
-    {
-    };
+    { };
     
     return(0);
 }
