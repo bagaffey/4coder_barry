@@ -1704,8 +1704,7 @@ SCROLL_RULE_SIG(casey_smooth_scroll_rule) {
 HOOK_SIG(casey_start)
 {
     exec_command(app, open_panel_vsplit);
-    
-    change_font(app, literal("Liberation Mono"), true);
+    achange_font(app, literal("Liberation Mono"), true);
     
     return(0);
 }
