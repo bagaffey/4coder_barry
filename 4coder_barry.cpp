@@ -1705,7 +1705,6 @@ HOOK_SIG(casey_start)
 {
     exec_command(app, open_panel_vsplit);
     achange_font(app, literal("Liberation Mono"), true);
-    
     return(0);
 }
 #endif
