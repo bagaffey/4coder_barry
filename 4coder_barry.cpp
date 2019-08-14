@@ -1703,7 +1703,8 @@ SCROLL_RULE_SIG(casey_smooth_scroll_rule) {
 #if 0
 HOOK_SIG(casey_start)
 {
-    exec_command(app, open_panel_vsplit);
+    exec_command(app, 
+		open_panel_vsplit);
     return(0);
 }
 #endif
