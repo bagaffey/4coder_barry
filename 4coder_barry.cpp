@@ -1702,9 +1702,7 @@ SCROLL_RULE_SIG(casey_smooth_scroll_rule) {
 
 #if 0
 HOOK_SIG(casey_start)
-{
-    return(0);
-}
+{ return(0); }
 #endif
 
 START_HOOK_SIG(casey_start)
