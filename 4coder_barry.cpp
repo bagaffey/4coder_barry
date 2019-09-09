@@ -641,18 +641,7 @@ CUSTOM_COMMAND_SIG(casey_find_corresponding_file_other_window)
 CUSTOM_COMMAND_SIG(casey_save_and_make_without_asking)
 {
     exec_command(app, change_active_panel);
-    
-#if 0
-    Buffer_Summary buffer = {};
-    
-    unsigned int access = AccessAll;
-    for (buffer = get_buffer_first(app, access);
-         buffer.exists;
-         get_buffer_next(app, &buffer, access))
-    {
-        save_buffer(app, &buffer, buffer.file_name, buffer.file_name_len, 0);
-    }
-#endif
+	
 	save_all_dirty_buffers(app);
     
     int size = app->memory_size / 2;
